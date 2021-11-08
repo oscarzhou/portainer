@@ -4,6 +4,7 @@ import (
 	httperror "github.com/portainer/libhttp/error"
 	portainer "github.com/portainer/portainer/api"
 	"github.com/portainer/portainer/api/dataservices"
+	"github.com/portainer/portainer/api/demo"
 	"github.com/portainer/portainer/api/http/proxy"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/portainer/portainer/api/internal/authorization"
@@ -25,6 +26,7 @@ func hideFields(endpoint *portainer.Endpoint) {
 type Handler struct {
 	*mux.Router
 	requestBouncer       *security.RequestBouncer
+	demoService          *demo.Service
 	DataStore            dataservices.DataStore
 	FileService          portainer.FileService
 	ProxyManager         *proxy.Manager
@@ -38,10 +40,11 @@ type Handler struct {
 }
 
 // NewHandler creates a handler to manage environment(endpoint) operations.
-func NewHandler(bouncer *security.RequestBouncer) *Handler {
+func NewHandler(bouncer *security.RequestBouncer, demoService *demo.Service) *Handler {
 	h := &Handler{
 		Router:         mux.NewRouter(),
 		requestBouncer: bouncer,
+		demoService:    demoService,
 	}
 
 	h.Handle("/endpoints",
