@@ -9,7 +9,7 @@ class DemoFeatureIndicatorController {
   $onInit() {
     const state = this.StateManager.getState();
 
-    this.isDemo = state.application.demoEnvironment;
+    this.isDemo = state.application.demoEnvironment.enabled;
   }
 }
 

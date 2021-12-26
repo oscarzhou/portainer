@@ -8,18 +8,22 @@ import (
 	"github.com/portainer/portainer/api/dataservices"
 )
 
-type environmentDetails struct {
-	Enabled      bool
-	Users        []portainer.UserID
-	Environments []portainer.EndpointID
+type EnvironmentDetails struct {
+	Enabled      bool                   `json:"enabled"`
+	Users        []portainer.UserID     `json:"users"`
+	Environments []portainer.EndpointID `json:"environments"`
 }
 
 type Service struct {
-	details environmentDetails
+	details EnvironmentDetails
 }
 
 func NewService() *Service {
 	return &Service{}
+}
+
+func (service *Service) Details() EnvironmentDetails {
+	return service.details
 }
 
 func (service *Service) Init(store dataservices.DataStore, cryptoService portainer.CryptoService) error {
@@ -40,7 +44,7 @@ func (service *Service) Init(store dataservices.DataStore, cryptoService portain
 		return errors.WithMessage(err, "failed updating demo settings")
 	}
 
-	service.details = environmentDetails{
+	service.details = EnvironmentDetails{
 		Enabled: true,
 		Users:   []portainer.UserID{1},
 		// endpoints 2,3 are created after deployment of portainer

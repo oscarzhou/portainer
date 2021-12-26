@@ -79,7 +79,9 @@ angular.module('portainer.app').controller('AccountController', [
       const state = StateManager.getState();
       const user = Authentication.getUserDetails();
       $scope.userID = user.ID;
-      $scope.isDemoUser = state.application.demoEnvironment && state.application.demoDetails.Users.includes($scope.userID);
+      if (state.application.demoEnvironment.enabled) {
+        $scope.isDemoUser = state.application.demoEnvironment.users.includes($scope.userID);
+      }
 
       const data = await UserService.user($scope.userID);
 

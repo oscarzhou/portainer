@@ -5,7 +5,14 @@ import (
 
 	httperror "github.com/portainer/libhttp/error"
 	"github.com/portainer/libhttp/response"
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/demo"
 )
+
+type status struct {
+	*portainer.Status
+	DemoEnvironment demo.EnvironmentDetails
+}
 
 // @id StatusInspect
 // @summary Check Portainer status
@@ -16,5 +23,8 @@ import (
 // @success 200 {object} portainer.Status "Success"
 // @router /status [get]
 func (handler *Handler) statusInspect(w http.ResponseWriter, r *http.Request) *httperror.HandlerError {
-	return response.JSON(w, handler.Status)
+	return response.JSON(w, &status{
+		Status:          handler.Status,
+		DemoEnvironment: handler.demoService.Details(),
+	})
 }
