@@ -37,7 +37,6 @@ angular.module('portainer.docker', ['portainer.app', containersModule, component
             }
 
             EndpointProvider.setEndpointID(endpoint.Id);
-            EndpointProvider.setEndpointPublicURL(endpoint.PublicURL);
             EndpointProvider.setOfflineModeFromStatus(endpoint.Status);
 
             await StateManager.updateEndpointState(endpoint);

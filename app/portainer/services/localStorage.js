@@ -8,12 +8,6 @@ angular.module('portainer.app').factory('LocalStorage', [
       getEndpointID: function () {
         return localStorageService.get('ENDPOINT_ID');
       },
-      storeEndpointPublicURL: function (publicURL) {
-        localStorageService.set('ENDPOINT_PUBLIC_URL', publicURL);
-      },
-      getEndpointPublicURL: function () {
-        return localStorageService.get('ENDPOINT_PUBLIC_URL');
-      },
       storeLoginStateUUID: function (uuid) {
         localStorageService.set('LOGIN_STATE_UUID', uuid);
       },

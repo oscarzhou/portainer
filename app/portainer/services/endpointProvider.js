@@ -10,15 +10,12 @@ angular.module('portainer.app').factory(
 
     service.initialize = function () {
       var endpointID = LocalStorage.getEndpointID();
-      var endpointPublicURL = LocalStorage.getEndpointPublicURL();
       var offlineMode = LocalStorage.getOfflineMode();
 
       if (endpointID) {
         endpoint.ID = endpointID;
       }
-      if (endpointPublicURL) {
-        endpoint.PublicURL = endpointPublicURL;
-      }
+
       if (offlineMode) {
         endpoint.OfflineMode = offlineMode;
       }
@@ -44,18 +41,6 @@ angular.module('portainer.app').factory(
     service.setEndpointID = function (id) {
       endpoint.ID = id;
       LocalStorage.storeEndpointID(id);
-    };
-
-    service.endpointPublicURL = function () {
-      if (endpoint.PublicURL === undefined) {
-        endpoint.PublicURL = LocalStorage.getEndpointPublicURL();
-      }
-      return endpoint.PublicURL;
-    };
-
-    service.setEndpointPublicURL = function (publicURL) {
-      endpoint.PublicURL = publicURL;
-      LocalStorage.storeEndpointPublicURL(publicURL);
     };
 
     service.endpoints = function () {
