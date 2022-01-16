@@ -34,7 +34,7 @@
           swarm-management="applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE' && applicationState.endpoint.mode.role === 'MANAGER'"
           standalone-management="applicationState.endpoint.mode.provider === 'DOCKER_STANDALONE'"
           admin-access="isAdmin || isEndpointAdmin"
-          offline-mode="endpointState.OfflineMode"
+          offline-mode="isOfflineEndpoint"
           endpoint-id="endpointId"
         ></docker-sidebar>
       </div>

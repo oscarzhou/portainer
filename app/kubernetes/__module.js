@@ -12,7 +12,7 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
       parent: 'endpoint',
       abstract: true,
 
-      onEnter: /* @ngInject */ function onEnter($async, $state, endpoint, EndpointProvider, KubernetesHealthService, KubernetesNamespaceService, Notifications, StateManager) {
+      onEnter: /* @ngInject */ function onEnter($async, $state, endpoint, KubernetesHealthService, KubernetesNamespaceService, Notifications, StateManager) {
         return $async(async () => {
           if (![5, 6, 7].includes(endpoint.Type)) {
             $state.go('portainer.home');
@@ -29,7 +29,6 @@ angular.module('portainer.kubernetes', ['portainer.app', registriesModule, custo
               }
             }
 
-            EndpointProvider.setEndpointID(endpoint.Id);
             await StateManager.updateEndpointState(endpoint);
 
             if (endpoint.Type === 7 && endpoint.Status === 2) {

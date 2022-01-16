@@ -48,13 +48,14 @@ function StateManagerFactory(
   };
 
   manager.clean = function () {
-    state.endpoint = {};
+    manager.cleanEndpoint();
     state.application = {};
   };
 
   manager.cleanEndpoint = function () {
     state.endpoint = {};
     EndpointProvider.clean();
+    LocalStorage.cleanEndpointState();
   };
 
   manager.updateLogo = function (logoURL) {

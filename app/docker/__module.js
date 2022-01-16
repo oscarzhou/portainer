@@ -13,7 +13,7 @@ angular.module('portainer.docker', ['portainer.app', containersModule, component
       parent: 'endpoint',
       url: '/docker',
       abstract: true,
-      onEnter: /* @ngInject */ function onEnter(endpoint, $async, $state, EndpointService, EndpointProvider, Notifications, StateManager, SystemService) {
+      onEnter: /* @ngInject */ function onEnter(endpoint, $async, $state, EndpointService, Notifications, StateManager, SystemService) {
         return $async(async () => {
           if (![1, 2, 4].includes(endpoint.Type)) {
             $state.go('portainer.home');
@@ -35,8 +35,6 @@ angular.module('portainer.docker', ['portainer.app', containersModule, component
                 throw new Error('Environment is unreachable. Connect to another swarm manager.');
               }
             }
-
-            EndpointProvider.setEndpointID(endpoint.Id);
 
             await StateManager.updateEndpointState(endpoint);
           } catch (e) {

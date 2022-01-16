@@ -15,14 +15,13 @@ angular
         url: '/azure',
         parent: 'endpoint',
         abstract: true,
-        onEnter: /* @ngInject */ function onEnter($async, $state, endpoint, EndpointProvider, Notifications, StateManager) {
+        onEnter: /* @ngInject */ function onEnter($async, $state, endpoint, Notifications, StateManager) {
           return $async(async () => {
             if (endpoint.Type !== 3) {
               $state.go('portainer.home');
               return;
             }
             try {
-              EndpointProvider.setEndpointID(endpoint.Id);
               await StateManager.updateEndpointState(endpoint);
             } catch (e) {
               Notifications.error('Failed loading environment', e);
