@@ -44,7 +44,7 @@ angular.module('portainer.docker').controller('HostViewController', [
           ctrl.jobs = data.jobs;
 
           if (ctrl.state.isAgent && agentApiVersion > 1) {
-            return AgentService.hostInfo(data.info.Hostname).then(function onHostInfoLoad(agentHostInfo) {
+            return AgentService.hostInfo(ctrl.endpoint.Id, data.info.Hostname).then(function onHostInfoLoad(agentHostInfo) {
               ctrl.devices = agentHostInfo.PCIDevices;
               ctrl.disks = agentHostInfo.PhysicalDisks;
             });

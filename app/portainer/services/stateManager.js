@@ -184,7 +184,7 @@ function StateManagerFactory(
         state.endpoint.apiVersion = endpointAPIVersion;
 
         if (endpointMode.agentProxy && endpoint.Status === 1) {
-          return AgentPingService.ping().then(function onPingSuccess(data) {
+          return AgentPingService.ping(endpoint.Id).then(function onPingSuccess(data) {
             state.endpoint.agentApiVersion = data.version;
           });
         }
