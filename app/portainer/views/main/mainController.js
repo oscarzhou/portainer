@@ -2,9 +2,8 @@ angular.module('portainer.app').controller('MainController', [
   '$scope',
   'LocalStorage',
   'StateManager',
-  'EndpointProvider',
   'ThemeManager',
-  function ($scope, LocalStorage, StateManager, EndpointProvider, ThemeManager) {
+  function ($scope, LocalStorage, StateManager, ThemeManager) {
     /**
      * Sidebar Toggle & Cookie Control
      */
@@ -14,7 +13,6 @@ angular.module('portainer.app').controller('MainController', [
     };
 
     $scope.applicationState = StateManager.getState();
-    $scope.endpointState = EndpointProvider.endpoint();
 
     $scope.$watch($scope.getWidth, function (newValue) {
       if (newValue >= mobileView) {
