@@ -20,12 +20,6 @@ angular.module('portainer.app').factory('LocalStorage', [
       getOfflineMode: function () {
         return localStorageService.get('ENDPOINT_OFFLINE_MODE');
       },
-      storeEndpoints: function (data) {
-        localStorageService.set('ENDPOINTS_DATA', data);
-      },
-      getEndpoints: function () {
-        return localStorageService.get('ENDPOINTS_DATA');
-      },
       storeEndpointState: function (state) {
         localStorageService.set('ENDPOINT_STATE', state);
       },

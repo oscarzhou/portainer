@@ -221,12 +221,6 @@ class KubernetesConfigureController {
       });
       await Promise.all(storagePromises);
 
-      const endpoints = this.EndpointProvider.endpoints();
-      const modifiedEndpoint = _.find(endpoints, (item) => item.Id === this.endpoint.Id);
-      if (modifiedEndpoint) {
-        this.assignFormValuesToEndpoint(modifiedEndpoint, storageClasses, ingressClasses);
-        this.EndpointProvider.setEndpoints(endpoints);
-      }
       this.Notifications.success('Configuration successfully applied');
       this.$state.go('portainer.home');
     } catch (err) {

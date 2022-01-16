@@ -38,14 +38,6 @@ angular.module('portainer.app').factory(
       LocalStorage.storeEndpointID(id);
     };
 
-    service.endpoints = function () {
-      return LocalStorage.getEndpoints();
-    };
-
-    service.setEndpoints = function (data) {
-      LocalStorage.storeEndpoints(data);
-    };
-
     service.currentEndpoint = function () {
       return state.currentEndpoint;
     };
