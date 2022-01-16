@@ -23,7 +23,6 @@ angular
             }
             try {
               EndpointProvider.setEndpointID(endpoint.Id);
-              EndpointProvider.setOfflineModeFromStatus(endpoint.Status);
               await StateManager.updateEndpointState(endpoint);
             } catch (e) {
               Notifications.error('Failed loading environment', e);
