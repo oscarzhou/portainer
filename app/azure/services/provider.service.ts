@@ -1,5 +1,3 @@
-// import { ContainerInstanceProviderViewModel } from '../models/provider';
-
 import { EnvironmentId } from '@/portainer/environments/types';
 import axios, { parseAxiosError } from '@/portainer/services/axios';
 

@@ -53,14 +53,14 @@ interface ContainerGroupProperties {
   osType: OS;
 }
 
-export interface ContainerGroup {
+export type ContainerGroup = {
   id: string;
   name: string;
   location: string;
   type: string;
   properties: ContainerGroupProperties;
   Portainer?: PortainerMetadata;
-}
+};
 
 export interface Subscription {
   subscriptionId: string;

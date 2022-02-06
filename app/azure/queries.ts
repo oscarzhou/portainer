@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { useQueries, useQuery } from 'react-query';
+import { useMemo } from 'react';
 
 import { EnvironmentId } from '@/portainer/environments/types';
 
@@ -13,11 +14,14 @@ import {
 } from './services/subscription.service';
 import { Subscription } from './types';
 import { getContainerInstanceProvider } from './services/provider.service';
-import { getContainerGroup } from './services/container-groups.service';
+import {
+  getContainerGroup,
+  getContainerGroups,
+} from './services/container-groups.service';
 
 export function useSubscriptions(environmentId: EnvironmentId) {
   return useQuery(
-    'azure.subscriptions',
+    ['azure', environmentId, 'subscriptions'],
     () => getSubscriptions(environmentId),
     {
       meta: {
@@ -163,6 +167,45 @@ export function useProviders(
     ),
     isLoading: queries.some((q) => q.isLoading),
   };
+}
+
+export function useContainerGroups(
+  environmentId: EnvironmentId,
+  subscriptions: Subscription[] = [],
+  enabled?: boolean
+) {
+  const queries = useQueries(
+    useMemo(
+      () =>
+        subscriptions.map((subscription) => ({
+          queryKey: [
+            'azure',
+            environmentId,
+            'subscriptions',
+            subscription.subscriptionId,
+            'containerGroups',
+          ],
+          queryFn: async () =>
+            getContainerGroups(environmentId, subscription.subscriptionId),
+          meta: {
+            error: {
+              title: 'Failure',
+              message: 'Unable to retrieve Azure resource groups',
+            },
+          },
+          enabled,
+        })),
+      [subscriptions, enabled, environmentId]
+    )
+  );
+
+  return useMemo(
+    () => ({
+      containerGroups: _.flatMap(_.compact(queries.map((q) => q.data))),
+      isLoading: queries.some((q) => q.isLoading),
+    }),
+    [queries]
+  );
 }
 
 export function useContainerGroup(

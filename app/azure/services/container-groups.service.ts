@@ -22,6 +22,22 @@ export async function createContainerGroup(
   }
 }
 
+export async function getContainerGroups(
+  environmentId: EnvironmentId,
+  subscriptionId: string
+) {
+  try {
+    const { data } = await axios.get<{ value: ContainerGroup[] }>(
+      buildUrl(environmentId, subscriptionId),
+      { params: { 'api-version': '2018-04-01' } }
+    );
+
+    return data.value;
+  } catch (e) {
+    throw parseAxiosError(e as Error, 'Unable to retrieve container groups');
+  }
+}
+
 export async function getContainerGroup(
   environmentId: EnvironmentId,
   subscriptionId: string,
@@ -45,13 +61,38 @@ export async function getContainerGroup(
   }
 }
 
+export async function deleteContainerGroup(
+  environmentId: EnvironmentId,
+  containerGroupId: string
+) {
+  try {
+    await axios.delete(`/endpoints/${environmentId}/azure${containerGroupId}`, {
+      params: { 'api-version': '2018-04-01' },
+    });
+  } catch (e) {
+    throw parseAxiosError(e as Error, 'Unable to remove container group');
+  }
+}
+
 function buildUrl(
   environmentId: EnvironmentId,
   subscriptionId: string,
-  resourceGroupName: string,
-  containerGroupName: string
+  resourceGroupName?: string,
+  containerGroupName?: string
 ) {
-  return `/endpoints/${environmentId}/azure/subscriptions/${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.ContainerInstance/containerGroups/${containerGroupName}`;
+  let url = `/endpoints/${environmentId}/azure/subscriptions/${subscriptionId}`;
+
+  if (resourceGroupName) {
+    url += `/resourceGroups/${resourceGroupName}`;
+  }
+
+  url += `/providers/Microsoft.ContainerInstance/containerGroups`;
+
+  if (containerGroupName) {
+    url += `/${containerGroupName}`;
+  }
+
+  return url;
 }
 
 function transformToPayload(model: ContainerInstanceFormValues) {
