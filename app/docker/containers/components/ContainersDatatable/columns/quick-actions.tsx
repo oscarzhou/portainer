@@ -63,7 +63,7 @@ function QuickActionsCell({
     <ContainerQuickActions
       containerId={container.Id}
       nodeName={container.NodeName}
-      status={container.Status}
+      status={container.State}
       state={wrapperState}
     />
   );

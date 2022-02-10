@@ -1,4 +1,4 @@
-import { Column } from 'react-table';
+import { CellProps, Column } from 'react-table';
 import clsx from 'clsx';
 import _ from 'lodash-es';
 
@@ -10,7 +10,7 @@ import type {
 
 export const state: Column<DockerContainer> = {
   Header: 'State',
-  accessor: 'Status',
+  accessor: 'State',
   id: 'state',
   Cell: StatusCell,
   sortType: 'string',
@@ -19,8 +19,13 @@ export const state: Column<DockerContainer> = {
   canHide: true,
 };
 
-function StatusCell({ value: status }: { value: DockerContainerStatus }) {
-  const statusNormalized = _.toLower(status);
+function StatusCell({
+  value: state,
+  row: {
+    original: { Status: status },
+  },
+}: CellProps<DockerContainer, DockerContainerStatus>) {
+  const statusNormalized = _.toLower(state);
   const hasHealthCheck = ['starting', 'healthy', 'unhealthy'].includes(
     statusNormalized
   );

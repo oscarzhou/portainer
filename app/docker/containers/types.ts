@@ -32,7 +32,8 @@ export type ContainerId = string;
 
 export type DockerContainer = {
   IsPortainer: boolean;
-  Status: DockerContainerStatus;
+  State: DockerContainerStatus;
+  Status: string;
   NodeName: string;
   Id: ContainerId;
   IP: string;

@@ -36,13 +36,13 @@ export function ContainersDatatableActions({
 }: Props) {
   const selectedItemCount = selectedItems.length;
   const hasPausedItemsSelected = selectedItems.some(
-    (item) => item.Status === 'paused'
+    (item) => item.State === 'paused'
   );
   const hasStoppedItemsSelected = selectedItems.some((item) =>
-    ['stopped', 'created'].includes(item.Status)
+    ['stopped', 'created'].includes(item.State)
   );
   const hasRunningItemsSelected = selectedItems.some((item) =>
-    ['running', 'healthy', 'unhealthy', 'starting'].includes(item.Status)
+    ['running', 'healthy', 'unhealthy', 'starting'].includes(item.State)
   );
 
   const isAuthorized = useAuthorizations([
@@ -221,7 +221,7 @@ export function ContainersDatatableActions({
 
   function onRemoveClick(selectedItems: DockerContainer[]) {
     const isOneContainerRunning = selectedItems.some(
-      (container) => container.Status === 'running'
+      (container) => container.State === 'running'
     );
 
     const runningTitle = isOneContainerRunning ? 'running' : '';
