@@ -3,12 +3,14 @@ import { EnvironmentProvider } from '@/portainer/environments/useEnvironment';
 import { TableSettingsProvider } from '@/portainer/components/datatables/components/useTableSettings';
 import type { Environment } from '@/portainer/environments/types';
 
+import { useContainers } from '../../queries';
+
 import {
   ContainersDatatable,
-  ContainerTableProps,
+  Props as ContainerDatatableProps,
 } from './ContainersDatatable';
 
-interface Props extends ContainerTableProps {
+interface Props extends ContainerDatatableProps {
   endpoint: Environment;
 }
 
@@ -26,11 +28,17 @@ export function ContainersDatatableContainer({
     sortBy: { id: 'state', desc: false },
   };
 
+  const containersQuery = useContainers(endpoint.Id);
+
+  if (containersQuery.isLoading || !containersQuery.data) {
+    return null;
+  }
+
   return (
     <EnvironmentProvider environment={endpoint}>
       <TableSettingsProvider defaults={defaultSettings} storageKey={tableKey}>
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <ContainersDatatable {...props} />
+        <ContainersDatatable {...props} dataset={containersQuery.data} />
       </TableSettingsProvider>
     </EnvironmentProvider>
   );

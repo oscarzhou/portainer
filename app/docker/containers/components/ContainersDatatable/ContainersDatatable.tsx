@@ -47,12 +47,15 @@ import { ContainersDatatableActions } from './ContainersDatatableActions';
 import { ContainersDatatableSettings } from './ContainersDatatableSettings';
 import { useColumns } from './columns';
 
-export interface ContainerTableProps {
+export interface Props {
   isAddActionVisible: boolean;
-  dataset: DockerContainer[];
   onRefresh?(): Promise<void>;
   isHostColumnVisible: boolean;
   tableKey?: string;
+}
+
+export interface DatasetProp {
+  dataset: DockerContainer[];
 }
 
 export function ContainersDatatable({
@@ -60,7 +63,7 @@ export function ContainersDatatable({
   dataset,
   onRefresh,
   isHostColumnVisible,
-}: ContainerTableProps) {
+}: Props & DatasetProp) {
   const { settings, setTableSettings } =
     useTableSettings<ContainersTableSettings>();
   const [searchBarValue, setSearchBarValue] = useSearchBarState('containers');
@@ -101,6 +104,7 @@ export function ContainersDatatable({
         return !row.original.IsPortainer;
       },
       selectCheckboxComponent: Checkbox,
+      autoResetSelectedRows: false,
     },
     useFilters,
     useGlobalFilter,

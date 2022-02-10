@@ -6,20 +6,20 @@ import { genericHandler } from '../rest/response/handlers';
 
 import { ContainerId, DockerContainer } from './types';
 
-interface Filters {
+export interface Filters {
   label?: string[];
 }
 
 export async function getContainers(
   environmentId: EnvironmentId,
-  all: boolean,
-  filters: Filters
+  all = true,
+  filters?: Filters
 ) {
   try {
     const response = await axios.get<DockerContainer[]>(
-      urlBuilder(environmentId),
+      urlBuilder(environmentId, undefined, 'json'),
       {
-        params: { all, filters: JSON.stringify(filters) },
+        params: { all, filters: filters && JSON.stringify(filters) },
       }
     );
     return response.data;

@@ -1,9 +1,5 @@
 # how to manage server state? - intro to Axios and react-query
 
-- the problem and how it was solved with angularjs
-- how we call the api using axios
-- how we can use it with react-query, to query and mutate
-
 Like any big app, Portainer has a lot of state from which most of it is loaded from the server. We have some local state, like table settings, but that's just the minority part of the state. Managing state is a problem that every app has to deal with. With angular, we can use the $http service to make requests to the server, and those we call in a specific feature service, that is called by a controller and persisted to the controller state. When a user refreshes the page, the state is reloaded. When a user creates a new object, we reload the page to reload the state.
 
 React has a lot of state management solutions, like redux, relay, mobx, etc. Most of them define a global state and a way to access it. Most are not handling the loading, just the data, while the developer needs to send the request to the server and handle the response, and manage loading and error states. The user also needs to manage caching and other pitfalls of managing state. In those solutions we would put out table settings and other local state also in the state.
@@ -76,7 +72,10 @@ Also, I didn't import axios from `axios` (i.e `import axios from 'axios'`), beca
 
 ## Let's prepare our example
 
-It's better to show with a real example. I want to refactor ContainersDatatable to use react-query, instead of getting its state from the angular view. Let's see how it's done right now:
+It's better to show with a real example. I want to refactor ContainersDatatable to use react-query.
+ContainersDatatable was converted to react in one of our first react PRs, but it still gets the state from angular. I want to change that and use react-query.
+
+Let's see how it's done right now:
 
 _app/docker/views/containers/containersController.js_
 
@@ -136,7 +135,9 @@ Same, the container service calls another service called `Container`, that does 
 
 We already have a container.service.ts file ready, let's add `getContainers` function to it.
 
-\*app/docker/containers/containers.service.ts()
+### Step 1: add a service function to query the server
+
+_app/docker/containers/containers.service.ts_
 
 ```ts
 interface Filters {
@@ -145,7 +146,7 @@ interface Filters {
 
 export async function getContainers(environmentId: EnvironmentId, all: boolean, filters: Filters) {
   try {
-    const response = await axios.get<DockerContainer[]>(urlBuilder(environmentId), {
+    const response = await axios.get<DockerContainer[]>(urlBuilder(environmentId, undefined, 'json'), {
       params: { all, filters: JSON.stringify(filters) },
     });
     return response.data;
@@ -154,3 +155,110 @@ export async function getContainers(environmentId: EnvironmentId, all: boolean, 
   }
 }
 ```
+
+This function is making a get request (`axios.get`), to the url `/api/endpoints/:environmentId/docker/containers/json`, with the query params `all=${all}&filters=${filtersJson}`. In Portainer everything after `/api/endpoints/:environmentId/docker` is proxied to the docker environment, so `containers/json` is the api to fetch docker containers, and the params are docker's params (so I won't go more in depth about them).
+
+We wrap with try/catch and parse the axios error to something more readable by our error handlers. **This is a subject to revisit, as we're still not sure if this the way we want it**
+
+### Step 2: Create a react-query custom hook
+
+Let's create a queries file, in the future it will include all the queries that are related to containers. I'm still thinking about it, if we need a service file and a query file, or should they be in the same file.
+
+_app/docker/containers/queries.ts_
+
+```ts
+import { useQuery } from 'react-query';
+
+import { EnvironmentId } from '@/portainer/environments/types';
+import { error as notifyError } from '@/portainer/services/notifications';
+
+import { Filters, getContainers } from './containers.service';
+
+export function useContainers(environmentId: EnvironmentId, all: boolean, filters: Filters) {
+  return useQuery(['docker', environmentId, 'containers', { all, filters }], () => getContainers(environmentId, all, filters), {
+    onError(err) {
+      notifyError('Failure', err as Error, 'Unable to retrieve containers');
+    },
+  });
+}
+```
+
+The main `react-query` function (or hook) is `useQuery`. This is where the magic happens. It receives two mandatory arguments - the query key and the fetcher function. The query key is very important, as it will define how the data is cached, and using that react-query will know if it should call the fetcher again or if it can get the data from the server.
+
+You can think about the query key as the dependency array of useEffect. The data (and its state), will change whenever the query key change, so it's important to be specific. The rule of thumb is to have all the parameters you give the fetcher inside of it, and queries can have hierarchy. So the query key above and `['docker', environmentId, 'containers', containerId]` are nested in `['docker', environmentId, 'containers']`, so if I want to refetch both I can invalidate both. As I said before, currently we reload the page to reload data. Using react-query we can just invalidate the page queries for that.
+
+the name "fetcher" is a bit misleading, any async function (i.e a function which returns a Promise) can be used here. For example, think of querying the user's location. But it's mostly used for server fetching functions.
+
+The third argument is the query options. React-query has many of those, I'd suggest checking them in the docs. Here we use the `onError` handler to notify of the error using the toaster. In our codebase you might see already things like:
+
+```ts
+const query = useQuery(queryKey, fetcher);
+
+useEffect(() => {
+  if (query.isError) {
+    notifyError('Failure', query.error as Error, 'Unable to load');
+  }
+}, [query.isError, query.error]);
+```
+
+it's basically the same as above, but cleaner (well, less code). In the near future, we will have an error handler in the QueryClient instance (`app/react-tools/RootProvider.tsx`), so you'll be able to do:
+
+```ts
+const query = useQuery(queryKey, fetcher, {
+  meta: {
+    error: { title: 'Failure', message: 'Unable to load' },
+  },
+});
+```
+
+I think there are a few good approaches to error handling (TODO, link to tkdodo blog post), we can use all of them where it's relevant.
+
+We've already seen that useQuery returns `isError` and `error`, it also returns `isLoading`, `isSuccess`, `isFetching` and more flags (all derived from `status` which is also returned).
+
+With these flags we can check the status of a query. The last is `data` which in our case will be an array of containers.
+
+## Step 3: Use the hook in our component
+
+In my experience, useQuery and useTable (`react-table`) had some problems being in the same component (If you know why, I'd love to hear about it). Lucky for us, we have `ContainersDatatableContainer.tsx`. Yes, I know the name is misleading, with react-query we're getting close to solving the caching problem, so maybe we can have an AI which generates names to components?
+
+In this component we initialize (and load) the table settings, and here we will fetch the dataset and conditionally load the table.
+
+_app/docker/containers/components/ContainersDatatable/ContainersDatatableContainer.tsx_
+
+```ts
+export function ContainersDatatableContainer({
+  endpoint,
+  tableKey = 'containers',
+  ...props
+}: Props) {
+
+const defaultSettings =....
+
+const containersQuery = useContainers(endpoint.Id);
+
+  if (containersQuery.isLoading || !containersQuery.data) {
+    return null;
+  }
+
+  return (
+    <EnvironmentProvider environment={endpoint}>
+      <TableSettingsProvider defaults={defaultSettings} storageKey={tableKey}>
+        <SearchBarProvider storageKey={tableKey}>
+          {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+          <ContainersDatatable {...props} dataset={containersQuery.data} />
+        </SearchBarProvider>
+      </TableSettingsProvider>
+    </EnvironmentProvider>
+  );
+
+```
+
+well, I was surprised to find out that this is it, it's working. Needs a bit of cleaning, but yes, it is that simple.
+
+Let's do something cool. Open one of the running containers in another tab (ctrl+click on one of the containers' names). and stop it (make sure it's not portainer).
+
+Now go back to the containers table, and the container's state will update. Cool, right?! How did it not work like this before?
+
+Ok, you probably just reading and can't see it, I'll try to add a video of it here.
+
+I think this is enough for this post. I'll add another post where we will use `useMutation` and see how to save server state and how to invalidate queries.
