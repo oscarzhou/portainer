@@ -229,9 +229,15 @@
   </div>
 </div>
 
-<div class="row" ng-if="containers && (!orphaned || orphanedRunning)">
+<div class="row" ng-if="stackType !== '1' && (!orphaned || orphanedRunning)">
   <div class="col-sm-12">
-    <containers-datatable dataset="containers" endpoint="endpoint" table-key="stack-containers"></containers-datatable>
+    <containers-datatable
+      filters="{
+        label: ['com.docker.compose.project=' + stackName],
+      }"
+      endpoint="endpoint"
+      table-key="stack-containers"
+    ></containers-datatable>
   </div>
 </div>
 

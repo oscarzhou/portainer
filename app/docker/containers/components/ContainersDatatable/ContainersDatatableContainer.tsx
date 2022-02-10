@@ -4,6 +4,7 @@ import { TableSettingsProvider } from '@/portainer/components/datatables/compone
 import type { Environment } from '@/portainer/environments/types';
 
 import { useContainers } from '../../queries';
+import { Filters } from '../../containers.service';
 
 import {
   ContainersDatatable,
@@ -12,11 +13,13 @@ import {
 
 interface Props extends ContainerDatatableProps {
   endpoint: Environment;
+  filters?: Filters;
 }
 
 export function ContainersDatatableContainer({
   endpoint,
   tableKey = 'containers',
+  filters,
   ...props
 }: Props) {
   const defaultSettings = {
@@ -28,7 +31,7 @@ export function ContainersDatatableContainer({
     sortBy: { id: 'state', desc: false },
   };
 
-  const containersQuery = useContainers(endpoint.Id);
+  const containersQuery = useContainers(endpoint.Id, true, filters);
 
   if (containersQuery.isLoading || !containersQuery.data) {
     return null;
@@ -49,7 +52,7 @@ export const ContainersDatatableAngular = react2angular(
   [
     'endpoint',
     'isAddActionVisible',
-    'dataset',
+    'filters',
     'onRefresh',
     'isHostColumnVisible',
     'tableKey',
