@@ -9,13 +9,11 @@
 <information-panel-offline ng-if="offlineMode"></information-panel-offline>
 
 <div class="row">
-  <div class="col-sm-12" ng-if="containers">
+  <div class="col-sm-12">
     <containers-datatable
       endpoint="endpoint"
-      dataset="containers"
       is-host-column-visible="applicationState.endpoint.mode.agentProxy && applicationState.endpoint.mode.provider === 'DOCKER_SWARM_MODE'"
       is-add-action-visible="true"
-      on-refresh="(getContainers)"
     ></containers-datatable>
   </div>
 </div>
