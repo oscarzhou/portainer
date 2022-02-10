@@ -27,7 +27,6 @@ import {
 import { multiple } from '@/portainer/components/datatables/components/filter-types';
 import { useTableSettings } from '@/portainer/components/datatables/components/useTableSettings';
 import { ColumnVisibilityMenu } from '@/portainer/components/datatables/components/ColumnVisibilityMenu';
-import { useRepeater } from '@/portainer/components/datatables/components/useRepeater';
 import { useDebounce } from '@/portainer/hooks/useDebounce';
 import {
   SearchBar,
@@ -49,21 +48,18 @@ import { useColumns } from './columns';
 
 export interface Props {
   isAddActionVisible: boolean;
-  onRefresh?(): Promise<void>;
   isHostColumnVisible: boolean;
+  isRefreshVisible: boolean;
   tableKey?: string;
-}
-
-export interface DatasetProp {
   dataset: DockerContainer[];
 }
 
 export function ContainersDatatable({
   isAddActionVisible,
   dataset,
-  onRefresh,
   isHostColumnVisible,
-}: Props & DatasetProp) {
+  isRefreshVisible,
+}: Props) {
   const { settings, setTableSettings } =
     useTableSettings<ContainersTableSettings>();
   const [searchBarValue, setSearchBarValue] = useSearchBarState('containers');
@@ -71,8 +67,6 @@ export function ContainersDatatable({
   const columns = useColumns();
 
   const endpoint = useEnvironment();
-
-  useRepeater(settings.autoRefreshRate, onRefresh);
 
   const {
     getTableProps,
@@ -153,7 +147,7 @@ export function ContainersDatatable({
           <TableSettingsMenu
             quickActions={<QuickActionsSettings actions={actions} />}
           >
-            <ContainersDatatableSettings isRefreshVisible={!!onRefresh} />
+            <ContainersDatatableSettings isRefreshVisible={isRefreshVisible} />
           </TableSettingsMenu>
         </TableTitleActions>
       </TableTitle>

@@ -8,7 +8,8 @@ import { Filters, getContainers } from './containers.service';
 export function useContainers(
   environmentId: EnvironmentId,
   all = true,
-  filters?: Filters
+  filters?: Filters,
+  autoRefreshRate?: number
 ) {
   return useQuery(
     ['docker', environmentId, 'containers', { all, filters }],
@@ -16,6 +17,13 @@ export function useContainers(
     {
       onError(err) {
         notifyError('Failure', err as Error, 'Unable to retrieve containers');
+      },
+      refetchInterval() {
+        if (autoRefreshRate) {
+          return autoRefreshRate;
+        }
+
+        return false;
       },
     }
   );
