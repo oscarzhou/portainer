@@ -1,9 +1,10 @@
 import { Column } from 'react-table';
 import { useSref } from '@uirouter/react';
 
-import { useEnvironment } from '@/portainer/environments/useEnvironment';
 import { EnvironmentStatus } from '@/portainer/environments/types';
 import type { DockerContainer } from '@/docker/containers/types';
+
+import { useRowContext } from '../RowContext';
 
 export const image: Column<DockerContainer> = {
   Header: 'Image',
@@ -21,8 +22,8 @@ interface Props {
 }
 
 function ImageCell({ value: imageName }: Props) {
-  const endpoint = useEnvironment();
-  const offlineMode = endpoint.Status !== EnvironmentStatus.Up;
+  const { environment } = useRowContext();
+  const offlineMode = environment.Status !== EnvironmentStatus.Up;
 
   const shortImageName = trimSHASum(imageName);
 

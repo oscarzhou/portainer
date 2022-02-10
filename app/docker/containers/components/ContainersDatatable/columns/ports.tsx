@@ -1,8 +1,9 @@
 import { Column } from 'react-table';
 import _ from 'lodash-es';
 
-import { useEnvironment } from '@/portainer/environments/useEnvironment';
 import type { DockerContainer, Port } from '@/docker/containers/types';
+
+import { useRowContext } from '../RowContext';
 
 export const ports: Column<DockerContainer> = {
   Header: 'Published Ports',
@@ -20,7 +21,8 @@ interface Props {
 }
 
 function PortsCell({ value: ports }: Props) {
-  const { PublicURL: publicUrl } = useEnvironment();
+  const { environment } = useRowContext();
+  const { PublicURL: publicUrl } = environment;
 
   if (ports.length === 0) {
     return '-';

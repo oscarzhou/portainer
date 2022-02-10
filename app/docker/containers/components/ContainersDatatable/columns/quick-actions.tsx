@@ -1,7 +1,6 @@
 import { CellProps, Column } from 'react-table';
 
 import { useTableSettings } from '@/portainer/components/datatables/components/useTableSettings';
-import { useEnvironment } from '@/portainer/environments/useEnvironment';
 import { useAuthorizations } from '@/portainer/hooks/useUser';
 import { ContainerQuickActions } from '@/docker/components/container-quick-actions/ContainerQuickActions';
 import type {
@@ -9,6 +8,8 @@ import type {
   DockerContainer,
 } from '@/docker/containers/types';
 import { EnvironmentStatus } from '@/portainer/environments/types';
+
+import { useRowContext } from '../RowContext';
 
 export const quickActions: Column<DockerContainer> = {
   Header: 'Quick Actions',
@@ -24,8 +25,8 @@ export const quickActions: Column<DockerContainer> = {
 function QuickActionsCell({
   row: { original: container },
 }: CellProps<DockerContainer>) {
-  const endpoint = useEnvironment();
-  const offlineMode = endpoint.Status !== EnvironmentStatus.Up;
+  const { environment } = useRowContext();
+  const offlineMode = environment.Status !== EnvironmentStatus.Up;
 
   const { settings } = useTableSettings<ContainersTableSettings>();
 

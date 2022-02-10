@@ -36,15 +36,16 @@ import type {
   ContainersTableSettings,
   DockerContainer,
 } from '@/docker/containers/types';
-import { useEnvironment } from '@/portainer/environments/useEnvironment';
 import { useRowSelect } from '@/portainer/components/datatables/components/useRowSelect';
 import { Checkbox } from '@/portainer/components/form-components/Checkbox';
 import { TableFooter } from '@/portainer/components/datatables/components/TableFooter';
 import { SelectedRowsCount } from '@/portainer/components/datatables/components/SelectedRowsCount';
+import { Environment } from '@/portainer/environments/types';
 
 import { ContainersDatatableActions } from './ContainersDatatableActions';
 import { ContainersDatatableSettings } from './ContainersDatatableSettings';
 import { useColumns } from './columns';
+import { RowProvider } from './RowContext';
 
 export interface Props {
   isAddActionVisible: boolean;
@@ -52,6 +53,7 @@ export interface Props {
   isRefreshVisible: boolean;
   tableKey?: string;
   dataset: DockerContainer[];
+  environment: Environment;
 }
 
 export function ContainersDatatable({
@@ -59,14 +61,13 @@ export function ContainersDatatable({
   dataset,
   isHostColumnVisible,
   isRefreshVisible,
+  environment,
 }: Props) {
   const { settings, setTableSettings } =
     useTableSettings<ContainersTableSettings>();
   const [searchBarValue, setSearchBarValue] = useSearchBarState('containers');
 
   const columns = useColumns();
-
-  const endpoint = useEnvironment();
 
   const {
     getTableProps,
@@ -156,7 +157,7 @@ export function ContainersDatatable({
         <ContainersDatatableActions
           selectedItems={selectedFlatRows.map((row) => row.original)}
           isAddActionVisible={isAddActionVisible}
-          endpointId={endpoint.Id}
+          endpointId={environment.Id}
         />
       </TableActions>
 
@@ -194,13 +195,14 @@ export function ContainersDatatable({
               prepareRow(row);
               const { key, className, role, style } = row.getRowProps();
               return (
-                <TableRow<DockerContainer>
-                  cells={row.cells}
-                  key={key}
-                  className={className}
-                  role={role}
-                  style={style}
-                />
+                <RowProvider context={{ environment }} key={key}>
+                  <TableRow<DockerContainer>
+                    cells={row.cells}
+                    className={className}
+                    role={role}
+                    style={style}
+                  />
+                </RowProvider>
               );
             })
           ) : (
