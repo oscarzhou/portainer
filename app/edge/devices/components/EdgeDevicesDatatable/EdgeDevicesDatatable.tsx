@@ -213,9 +213,11 @@ export function EdgeDevicesDatatable({
             return (
               <RowProvider
                 key={key}
-                disableTrustOnFirstConnect={disableTrustOnFirstConnect}
-                isOpenAmtEnabled={isOpenAmtEnabled}
-                groupName={group[0]?.Name}
+                context={{
+                  disableTrustOnFirstConnect,
+                  isOpenAmtEnabled,
+                  groupName: group[0]?.Name,
+                }}
               >
                 <TableRow<Environment>
                   cells={row.cells}
