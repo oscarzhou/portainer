@@ -351,12 +351,8 @@ angular.module('portainer.app').controller('StackController', [
             $scope.stack.Status = data.resources && ((isSwarm && data.resources.services.length) || data.resources.containers.length) ? 1 : 2;
           }
 
-          if ($scope.stack.Status === 1) {
-            if (isSwarm) {
-              assignSwarmStackResources(data.resources, agentProxy);
-            } else {
-              assignComposeStackResources(data.resources);
-            }
+          if (isSwarm && $scope.stack.Status === 1) {
+            assignSwarmStackResources(data.resources, agentProxy);
           }
 
           $scope.state.yamlError = StackHelper.validateYAML($scope.stackFileContent, $scope.containerNames);
@@ -411,10 +407,6 @@ angular.module('portainer.app').controller('StackController', [
       });
     }
 
-    function assignComposeStackResources(resources) {
-      $scope.containers = resources.containers;
-    }
-
     function loadExternalStack(name) {
       var stackType = $transition$.params().type;
       if (!stackType || (stackType !== '1' && stackType !== '2')) {
@@ -424,8 +416,6 @@ angular.module('portainer.app').controller('StackController', [
 
       if (stackType === '1') {
         loadExternalSwarmStack(name);
-      } else {
-        loadExternalComposeStack(name);
       }
     }
 
@@ -435,16 +425,6 @@ angular.module('portainer.app').controller('StackController', [
       retrieveSwarmStackResources(name, agentProxy)
         .then(function success(data) {
           assignSwarmStackResources(data, agentProxy);
-        })
-        .catch(function error(err) {
-          Notifications.error('Failure', err, 'Unable to retrieve stack details');
-        });
-    }
-
-    function loadExternalComposeStack(name) {
-      retrieveComposeStackResources(name)
-        .then(function success(data) {
-          assignComposeStackResources(data);
         })
         .catch(function error(err) {
           Notifications.error('Failure', err, 'Unable to retrieve stack details');
