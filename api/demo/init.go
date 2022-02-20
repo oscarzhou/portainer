@@ -41,7 +41,6 @@ func initDemoLocalEndpoint(store dataservices.DataStore) error {
 		AuthorizedTeams:    []portainer.TeamID{},
 		UserAccessPolicies: portainer.UserAccessPolicies{},
 		TeamAccessPolicies: portainer.TeamAccessPolicies{},
-		Extensions:         []portainer.EndpointExtension{},
 		TagIDs:             []portainer.TagID{},
 		Status:             portainer.EndpointStatusUp,
 		Snapshots:          []portainer.DockerSnapshot{},
