@@ -72,6 +72,7 @@ func initDemoSettings(
 	}
 
 	settings.EnableTelemetry = false
+	settings.LogoURL = ""
 
 	err = store.Settings().UpdateSettings(settings)
 	return errors.WithMessage(err, "failed updating settings")
