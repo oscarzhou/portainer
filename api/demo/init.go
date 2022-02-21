@@ -32,7 +32,8 @@ func initDemoEndpoints(store dataservices.DataStore) ([]portainer.EndpointID, er
 		return nil, err
 	}
 
-	// endpoints 2,3 are created after deployment of portainer
+	// second and third endpoints are going to be created with docker-compose as a part of the demo environment set up.
+	// ref: https://github.com/portainer/portainer-demo/blob/master/docker-compose.yml
 	return []portainer.EndpointID{localEndpointId, localEndpointId + 1, localEndpointId + 2}, nil
 }
 
