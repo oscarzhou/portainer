@@ -29,12 +29,12 @@ func (service *Service) Details() EnvironmentDetails {
 func (service *Service) Init(store dataservices.DataStore, cryptoService portainer.CryptoService) error {
 	log.Print("[INFO] [main] Starting demo environment")
 
-	err := initDemoUser(store, cryptoService)
+	id, err := initDemoUser(store, cryptoService)
 	if err != nil {
 		return errors.WithMessage(err, "failed creating demo user")
 	}
 
-	err = initDemoLocalEndpoint(store)
+	endpointIds, err := initDemoEndpoints(store)
 	if err != nil {
 		return errors.WithMessage(err, "failed creating demo endpoint")
 	}
@@ -46,9 +46,9 @@ func (service *Service) Init(store dataservices.DataStore, cryptoService portain
 
 	service.details = EnvironmentDetails{
 		Enabled: true,
-		Users:   []portainer.UserID{1},
+		Users:   []portainer.UserID{id},
 		// endpoints 2,3 are created after deployment of portainer
-		Environments: []portainer.EndpointID{1, 2, 3},
+		Environments: endpointIds,
 	}
 
 	return nil

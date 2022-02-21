@@ -9,11 +9,11 @@ import (
 func initDemoUser(
 	store dataservices.DataStore,
 	cryptoService portainer.CryptoService,
-) error {
+) (portainer.UserID, error) {
 
 	password, err := cryptoService.Hash("tryportainer")
 	if err != nil {
-		return errors.WithMessage(err, "failed creating password hash")
+		return 0, errors.WithMessage(err, "failed creating password hash")
 	}
 
 	admin := &portainer.User{
@@ -23,12 +23,23 @@ func initDemoUser(
 	}
 
 	err = store.User().Create(admin)
-	return errors.WithMessage(err, "failed creating user")
+	return admin.ID, errors.WithMessage(err, "failed creating user")
 }
 
-func initDemoLocalEndpoint(store dataservices.DataStore) error {
+func initDemoEndpoints(store dataservices.DataStore) ([]portainer.EndpointID, error) {
+	localEndpointId, err := initDemoLocalEndpoint(store)
+	if err != nil {
+		return nil, err
+	}
+
+	// endpoints 2,3 are created after deployment of portainer
+	return []portainer.EndpointID{localEndpointId, localEndpointId + 1, localEndpointId + 2}, nil
+}
+
+func initDemoLocalEndpoint(store dataservices.DataStore) (portainer.EndpointID, error) {
+	id := portainer.EndpointID(store.Endpoint().GetNextIdentifier())
 	localEndpoint := &portainer.Endpoint{
-		ID:        portainer.EndpointID(1),
+		ID:        id,
 		Name:      "local",
 		URL:       "unix:///var/run/docker.sock",
 		PublicURL: "demo.portainer.io",
@@ -48,7 +59,7 @@ func initDemoLocalEndpoint(store dataservices.DataStore) error {
 	}
 
 	err := store.Endpoint().Create(localEndpoint)
-	return errors.WithMessage(err, "failed creating swarm endpoint")
+	return id, errors.WithMessage(err, "failed creating local endpoint")
 }
 
 func initDemoSettings(
