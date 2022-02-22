@@ -21,9 +21,6 @@ export const state: Column<DockerContainer> = {
 
 function StatusCell({
   value: state,
-  row: {
-    original: { Status: status },
-  },
 }: CellProps<DockerContainer, DockerContainerStatus>) {
   const statusNormalized = _.toLower(state);
   const hasHealthCheck = ['starting', 'healthy', 'unhealthy'].includes(
@@ -39,7 +36,7 @@ function StatusCell({
       })}
       title={hasHealthCheck ? 'This container has a health check' : ''}
     >
-      {status}
+      {state}
     </span>
   );
 
