@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCurrentStateAndParams } from '@uirouter/react';
 import {
   useTable,
   useSortBy,
@@ -27,7 +27,6 @@ import {
 import { multiple } from '@/portainer/components/datatables/components/filter-types';
 import { useTableSettings } from '@/portainer/components/datatables/components/useTableSettings';
 import { ColumnVisibilityMenu } from '@/portainer/components/datatables/components/ColumnVisibilityMenu';
-import { useDebounce } from '@/portainer/hooks/useDebounce';
 import {
   SearchBar,
   useSearchBarState,
@@ -41,6 +40,8 @@ import { Checkbox } from '@/portainer/components/form-components/Checkbox';
 import { TableFooter } from '@/portainer/components/datatables/components/TableFooter';
 import { SelectedRowsCount } from '@/portainer/components/datatables/components/SelectedRowsCount';
 import { Environment } from '@/portainer/environments/types';
+import { useContainers } from '@/docker/containers/queries';
+import { Filters } from '@/docker/containers/containers.service';
 
 import { ContainersDatatableActions } from './ContainersDatatableActions';
 import { ContainersDatatableSettings } from './ContainersDatatableSettings';
@@ -48,26 +49,45 @@ import { useColumns } from './columns';
 import { RowProvider } from './RowContext';
 
 export interface Props {
+  filters?: Filters;
   isAddActionVisible: boolean;
   isHostColumnVisible: boolean;
   isRefreshVisible: boolean;
   tableKey?: string;
-  dataset: DockerContainer[];
   environment: Environment;
 }
 
+const actions = [
+  buildAction('logs', 'Logs'),
+  buildAction('inspect', 'Inspect'),
+  buildAction('stats', 'Stats'),
+  buildAction('exec', 'Console'),
+  buildAction('attach', 'Attach'),
+];
+
 export function ContainersDatatable({
   isAddActionVisible,
-  dataset,
   isHostColumnVisible,
   isRefreshVisible,
   environment,
+  filters,
 }: Props) {
   const { settings, setTableSettings } =
     useTableSettings<ContainersTableSettings>();
   const [searchBarValue, setSearchBarValue] = useSearchBarState('containers');
 
-  const columns = useColumns();
+  const columns = useColumns(isHostColumnVisible);
+
+  const {
+    params: { endpointId },
+  } = useCurrentStateAndParams();
+
+  const containersQuery = useContainers(
+    endpointId,
+    true,
+    filters,
+    isRefreshVisible ? settings.autoRefreshRate * 1000 : undefined
+  );
 
   const {
     getTableProps,
@@ -80,14 +100,13 @@ export function ContainersDatatable({
     gotoPage,
     setPageSize,
     setHiddenColumns,
-    toggleHideColumn,
     setGlobalFilter,
     state: { pageIndex, pageSize },
   } = useTable<DockerContainer>(
     {
       defaultCanFilter: false,
       columns,
-      data: dataset,
+      data: containersQuery.isSuccess ? containersQuery.data : [],
       filterTypes: { multiple },
       initialState: {
         pageSize: settings.pageSize || 10,
@@ -100,6 +119,7 @@ export function ContainersDatatable({
       },
       selectCheckboxComponent: Checkbox,
       autoResetSelectedRows: false,
+      autoResetGlobalFilter: false,
     },
     useFilters,
     useGlobalFilter,
@@ -109,28 +129,14 @@ export function ContainersDatatable({
     useRowSelectColumn
   );
 
-  const debouncedSearchValue = useDebounce(searchBarValue);
-
-  useEffect(() => {
-    setGlobalFilter(debouncedSearchValue);
-  }, [debouncedSearchValue, setGlobalFilter]);
-
-  useEffect(() => {
-    toggleHideColumn('host', !isHostColumnVisible);
-  }, [toggleHideColumn, isHostColumnVisible]);
-
   const columnsToHide = allColumns.filter((colInstance) => {
     const columnDef = columns.find((c) => c.id === colInstance.id);
     return columnDef?.canHide;
   });
 
-  const actions = [
-    buildAction('logs', 'Logs'),
-    buildAction('inspect', 'Inspect'),
-    buildAction('stats', 'Stats'),
-    buildAction('exec', 'Console'),
-    buildAction('attach', 'Attach'),
-  ];
+  if (containersQuery.isLoading || !containersQuery.data) {
+    return null;
+  }
 
   const tableProps = getTableProps();
   const tbodyProps = getTableBodyProps();
@@ -201,6 +207,7 @@ export function ContainersDatatable({
                     className={className}
                     role={role}
                     style={style}
+                    key={key}
                   />
                 </RowProvider>
               );
@@ -222,7 +229,7 @@ export function ContainersDatatable({
           pageLimit={pageSize}
           page={pageIndex + 1}
           onPageChange={(p) => gotoPage(p - 1)}
-          totalCount={dataset.length}
+          totalCount={containersQuery.data ? containersQuery.data.length : 0}
           onPageLimitChange={handlePageSizeChange}
         />
       </TableFooter>
@@ -241,6 +248,7 @@ export function ContainersDatatable({
 
   function handleSearchBarChange(value: string) {
     setSearchBarValue(value);
+    setGlobalFilter(value);
   }
 
   function handleSortChange(id: string, desc: boolean) {

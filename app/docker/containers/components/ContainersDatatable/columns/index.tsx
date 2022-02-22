@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { useMemo } from 'react';
 
 import { created } from './created';
@@ -11,20 +12,21 @@ import { quickActions } from './quick-actions';
 import { stack } from './stack';
 import { state } from './state';
 
-export function useColumns() {
+export function useColumns(isHostColumnVisible: boolean) {
   return useMemo(
-    () => [
-      name,
-      state,
-      quickActions,
-      stack,
-      image,
-      created,
-      ip,
-      host,
-      ports,
-      ownership,
-    ],
-    []
+    () =>
+      _.compact([
+        name,
+        state,
+        quickActions,
+        stack,
+        image,
+        created,
+        ip,
+        isHostColumnVisible && host,
+        ports,
+        ownership,
+      ]),
+    [isHostColumnVisible]
   );
 }
