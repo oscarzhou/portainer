@@ -23,6 +23,7 @@ import {
   TableSettingsMenu,
   TableTitle,
   TableTitleActions,
+  TableContent,
 } from '@/portainer/components/datatables/components';
 import { multiple } from '@/portainer/components/datatables/components/filter-types';
 import { useTableSettings } from '@/portainer/components/datatables/components/useTableSettings';
@@ -196,29 +197,23 @@ export function ContainersDatatable({
           role={tbodyProps.role}
           style={tbodyProps.style}
         >
-          {page.length > 0 ? (
-            page.map((row) => {
-              prepareRow(row);
-              const { key, className, role, style } = row.getRowProps();
-              return (
-                <RowProvider context={{ environment }} key={key}>
-                  <TableRow<DockerContainer>
-                    cells={row.cells}
-                    className={className}
-                    role={role}
-                    style={style}
-                    key={key}
-                  />
-                </RowProvider>
-              );
-            })
-          ) : (
-            <tr>
-              <td colSpan={columns.length} className="text-center text-muted">
-                No container available.
-              </td>
-            </tr>
-          )}
+          <TableContent
+            emptyContent="No container available."
+            rows={page}
+            isLoading={containersQuery.isLoading}
+            prepareRow={prepareRow}
+            renderRow={(row, { key, className, role, style }) => (
+              <RowProvider context={{ environment }} key={key}>
+                <TableRow<DockerContainer>
+                  cells={row.cells}
+                  className={className}
+                  role={role}
+                  style={style}
+                  key={key}
+                />
+              </RowProvider>
+            )}
+          />
         </tbody>
       </Table>
 
