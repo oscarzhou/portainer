@@ -8,7 +8,7 @@ import {
 
 export function EdgeDevicesDatatableContainer({
   ...props
-}: EdgeDevicesTableProps) {
+}: Omit<EdgeDevicesTableProps, 'tableKey'>) {
   const defaultSettings = {
     autoRefreshRate: 0,
     hiddenQuickActions: [],

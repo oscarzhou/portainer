@@ -30,7 +30,7 @@ export function ContainersDatatableContainer({
     <EnvironmentProvider environment={endpoint}>
       <TableSettingsProvider defaults={defaultSettings} storageKey={tableKey}>
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <ContainersDatatable {...props} />
+        <ContainersDatatable {...props} tableKey={tableKey} />
       </TableSettingsProvider>
     </EnvironmentProvider>
   );
