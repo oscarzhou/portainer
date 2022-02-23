@@ -856,14 +856,6 @@ json-tree .branch-preview {
   border: none;
 }
 
-.dispay-flex {
-  display: flex;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
 .text-wrap {
   word-break: break-all;
   white-space: normal;
