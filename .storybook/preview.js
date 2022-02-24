@@ -3,6 +3,11 @@ import '../app/assets/css';
 import { pushStateLocationPlugin, UIRouter } from '@uirouter/react';
 import { initialize as initMSW, mswDecorator } from 'msw-storybook-addon';
 import { handlers } from '@/setup-tests/server-handlers';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+const testQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
 
 // Initialize MSW
 initMSW({
@@ -33,9 +38,11 @@ export const parameters = {
 
 export const decorators = [
   (Story) => (
-    <UIRouter plugins={[pushStateLocationPlugin]}>
-      <Story />
-    </UIRouter>
+    <QueryClientProvider client={testQueryClient}>
+      <UIRouter plugins={[pushStateLocationPlugin]}>
+        <Story />
+      </UIRouter>
+    </QueryClientProvider>
   ),
   mswDecorator,
 ];
