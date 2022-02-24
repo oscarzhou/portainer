@@ -2,16 +2,14 @@ import { clear as clearSessionStorage } from './session-storage';
 
 angular.module('portainer.app').factory('Authentication', [
   '$async',
-  '$state',
   'Auth',
   'OAuth',
   'jwtHelper',
   'LocalStorage',
   'StateManager',
-  'EndpointProvider',
   'UserService',
   'ThemeManager',
-  function AuthenticationFactory($async, $state, Auth, OAuth, jwtHelper, LocalStorage, StateManager, EndpointProvider, UserService, ThemeManager) {
+  function AuthenticationFactory($async, Auth, OAuth, jwtHelper, LocalStorage, StateManager, UserService, ThemeManager) {
     'use strict';
 
     var service = {};
