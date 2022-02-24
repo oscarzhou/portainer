@@ -1,8 +1,8 @@
 import { object, string, array, number } from 'yup';
 
-import { TeamViewModel } from '@/portainer/models/team';
+import { Team } from '@/portainer/teams/types';
 
-export function validationSchema(teams: TeamViewModel[]) {
+export function validationSchema(teams: Team[]) {
   return object().shape({
     name: string()
       .required('This field is required.')

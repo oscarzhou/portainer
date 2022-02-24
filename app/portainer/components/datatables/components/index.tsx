@@ -7,3 +7,4 @@ export { TableTitle } from './TableTitle';
 export { TableContainer } from './TableContainer';
 export { TableHeaderRow } from './TableHeaderRow';
 export { TableRow } from './TableRow';
+export { TableContent } from './TableContent';

@@ -7,6 +7,7 @@ import {
 } from '@/portainer/license-management/types';
 import { EnvironmentGroup } from '@/portainer/environment-groups/types';
 import { Tag } from '@/portainer/tags/types';
+import { UserId } from '@/portainer/users/types';
 
 import { createMockTeams, createMockUsers } from '../react-tools/test-mocks';
 
@@ -29,6 +30,12 @@ export const handlers = [
   ),
   rest.get('/api/users', async (req, res, ctx) =>
     res(ctx.json(createMockUsers(10)))
+  ),
+  rest.post<{ name: string }>('/api/teams', (req, res, ctx) =>
+    res(ctx.status(204))
+  ),
+  rest.post<{ userId: UserId }>('/api/team_memberships', (req, res, ctx) =>
+    res(ctx.status(204))
   ),
   ...azureHandlers,
   rest.get('/api/licenses/info', (req, res, ctx) => res(ctx.json(licenseInfo))),

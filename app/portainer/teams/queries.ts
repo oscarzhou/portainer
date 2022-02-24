@@ -1,7 +1,9 @@
-import { useQuery } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 
-import { getTeams } from './teams.service';
-import { Team } from './types';
+import { notifyError } from '../services/notifications';
+
+import { createTeam, getTeams } from './teams.service';
+import { FormValues, Team } from './types';
 
 export function useTeams<T = Team[]>(
   enabled = true,
@@ -16,4 +18,15 @@ export function useTeams<T = Team[]>(
   });
 
   return teams;
+}
+
+export function useAddTeamMutation() {
+  return useMutation(
+    (values: FormValues) => createTeam(values.name, values.leaders),
+    {
+      onError(error) {
+        notifyError('Failure', error as Error, 'Failure to add team');
+      },
+    }
+  );
 }
