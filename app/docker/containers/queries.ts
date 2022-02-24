@@ -19,11 +19,7 @@ export function useContainers(
         notifyError('Failure', err as Error, 'Unable to retrieve containers');
       },
       refetchInterval() {
-        if (autoRefreshRate) {
-          return autoRefreshRate;
-        }
-
-        return false;
+        return autoRefreshRate ?? false;
       },
     }
   );
