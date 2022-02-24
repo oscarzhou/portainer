@@ -2,7 +2,7 @@ import { PropsWithChildren } from 'react';
 import { Row, TableRowProps } from 'react-table';
 
 interface Props<T extends Record<string, unknown> = Record<string, unknown>> {
-  isLoading: boolean;
+  isLoading?: boolean;
   rows: Row<T>[];
   emptyContent?: string;
   prepareRow(row: Row<T>): void;
@@ -12,7 +12,7 @@ interface Props<T extends Record<string, unknown> = Record<string, unknown>> {
 export function TableContent<
   T extends Record<string, unknown> = Record<string, unknown>
 >({
-  isLoading,
+  isLoading = false,
   rows,
   emptyContent = 'No items available',
   prepareRow,

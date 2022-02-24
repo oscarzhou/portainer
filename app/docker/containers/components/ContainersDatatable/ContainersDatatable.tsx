@@ -1,4 +1,3 @@
-import { useCurrentStateAndParams } from '@uirouter/react';
 import {
   useTable,
   useSortBy,
@@ -8,6 +7,7 @@ import {
   Row,
 } from 'react-table';
 import { useRowSelectColumn } from '@lineup-lite/hooks';
+import { useMemo } from 'react';
 
 import { PaginationControls } from '@/portainer/components/pagination-controls';
 import {
@@ -41,7 +41,6 @@ import { Checkbox } from '@/portainer/components/form-components/Checkbox';
 import { TableFooter } from '@/portainer/components/datatables/components/TableFooter';
 import { SelectedRowsCount } from '@/portainer/components/datatables/components/SelectedRowsCount';
 import { Environment } from '@/portainer/environments/types';
-import { useContainers } from '@/docker/containers/queries';
 import { Filters } from '@/docker/containers/containers.service';
 
 import { ContainersDatatableActions } from './ContainersDatatableActions';
@@ -52,6 +51,7 @@ import { RowProvider } from './RowContext';
 export interface Props {
   filters?: Filters;
   isAddActionVisible: boolean;
+  containers: DockerContainer[];
   isHostColumnVisible: boolean;
   isRefreshVisible: boolean;
   tableKey?: string;
@@ -68,27 +68,16 @@ const actions = [
 
 export function ContainersDatatable({
   isAddActionVisible,
+  containers,
   isHostColumnVisible,
   isRefreshVisible,
   environment,
-  filters,
 }: Props) {
   const { settings, setTableSettings } =
     useTableSettings<ContainersTableSettings>();
   const [searchBarValue, setSearchBarValue] = useSearchBarState('containers');
 
   const columns = useColumns(isHostColumnVisible);
-
-  const {
-    params: { endpointId },
-  } = useCurrentStateAndParams();
-
-  const containersQuery = useContainers(
-    endpointId,
-    true,
-    filters,
-    isRefreshVisible ? settings.autoRefreshRate * 1000 : undefined
-  );
 
   const {
     getTableProps,
@@ -107,7 +96,7 @@ export function ContainersDatatable({
     {
       defaultCanFilter: false,
       columns,
-      data: containersQuery.isSuccess ? containersQuery.data : [],
+      data: containers,
       filterTypes: { multiple },
       initialState: {
         pageSize: settings.pageSize || 10,
@@ -135,9 +124,7 @@ export function ContainersDatatable({
     return columnDef?.canHide;
   });
 
-  if (containersQuery.isLoading || !containersQuery.data) {
-    return null;
-  }
+  const rowContext = useMemo(() => ({ environment }), [environment]);
 
   const tableProps = getTableProps();
   const tbodyProps = getTableBodyProps();
@@ -200,10 +187,9 @@ export function ContainersDatatable({
           <TableContent
             emptyContent="No container available."
             rows={page}
-            isLoading={containersQuery.isLoading}
             prepareRow={prepareRow}
             renderRow={(row, { key, className, role, style }) => (
-              <RowProvider context={{ environment }} key={key}>
+              <RowProvider context={rowContext} key={key}>
                 <TableRow<DockerContainer>
                   cells={row.cells}
                   className={className}
@@ -224,7 +210,7 @@ export function ContainersDatatable({
           pageLimit={pageSize}
           page={pageIndex + 1}
           onPageChange={(p) => gotoPage(p - 1)}
-          totalCount={containersQuery.data ? containersQuery.data.length : 0}
+          totalCount={containers.length}
           onPageLimitChange={handlePageSizeChange}
         />
       </TableFooter>
