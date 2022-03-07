@@ -93,10 +93,6 @@ function EndpointController(
     EnvVarSource: '',
   };
 
-  $scope.isKubernetesDeploymentTabSelected = function () {
-    return $scope.state.deploymentTab === DEPLOYMENT_TABS.KUBERNETES;
-  };
-
   $scope.copyEdgeAgentDeploymentCommand = copyEdgeAgentDeploymentCommand;
   function copyEdgeAgentDeploymentCommand() {
     let agentVersion = $scope.agentVersion;
