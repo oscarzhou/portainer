@@ -20,8 +20,8 @@ export interface FormValues {
 export type TeamMembershipId = number;
 
 export interface TeamMembership {
-  Id: number;
+  Id: TeamMembershipId;
+  Role: TeamRole;
   UserID: UserId;
   TeamID: TeamId;
-  Role: TeamRole;
 }

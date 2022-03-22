@@ -3,13 +3,22 @@ import axios, { parseAxiosError } from '@/portainer/services/axios';
 import { UserId } from '../users/types';
 
 import { createTeamMembership } from './team-membership.service';
-import { Team, TeamId, TeamRole } from './types';
+import { Team, TeamId, TeamMembership, TeamRole } from './types';
 
 export async function getTeams(onlyLedTeams = false) {
   try {
     const { data } = await axios.get<Team[]>(buildUrl(), {
       params: { onlyLedTeams },
     });
+    return data;
+  } catch (error) {
+    throw parseAxiosError(error as Error);
+  }
+}
+
+export async function getTeam(id: TeamId) {
+  try {
+    const { data } = await axios.get<Team>(buildUrl(id));
     return data;
   } catch (error) {
     throw parseAxiosError(error as Error);
@@ -37,11 +46,26 @@ export async function createTeam(name: string, leaders: UserId[]) {
   }
 }
 
-function buildUrl(id?: TeamId) {
+export async function getTeamMemberships(teamId: TeamId) {
+  try {
+    const { data } = await axios.get<TeamMembership[]>(
+      buildUrl(teamId, 'memberships')
+    );
+    return data;
+  } catch (e) {
+    throw parseAxiosError(e as Error, 'Unable to get team memberships');
+  }
+}
+
+function buildUrl(id?: TeamId, action?: string) {
   let url = '/teams';
 
   if (id) {
     url += `/${id}`;
+  }
+
+  if (action) {
+    url += `/${action}`;
   }
 
   return url;

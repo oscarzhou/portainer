@@ -12,7 +12,7 @@ export function useUserMembership(userId?: UserId) {
 }
 
 export function useUsers<T = User[]>(
-  includeAdministrator: boolean,
+  includeAdministrator = false,
   enabled = true,
   select: (data: User[]) => T = (data) => data as unknown as T
 ) {

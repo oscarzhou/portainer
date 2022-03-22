@@ -2,10 +2,12 @@ import angular from 'angular';
 import { StateRegistry } from '@uirouter/angularjs';
 
 import { TeamsViewAngular } from './TeamsView';
+import { TeamViewAngular } from './TeamView/TeamView';
 
 export default angular
   .module('portainer.app.teams', [])
   .config(config)
+  .component('teamView', TeamViewAngular)
   .component('teamsView', TeamsViewAngular).name;
 
 /* @ngInject */
@@ -25,8 +27,7 @@ function config($stateRegistryProvider: StateRegistry) {
     url: '/:id',
     views: {
       'content@': {
-        templateUrl: './angularjs/views/edit/team.html',
-        controller: 'TeamController',
+        component: 'teamView',
       },
     },
   });

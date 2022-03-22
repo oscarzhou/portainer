@@ -2,8 +2,13 @@ import { useMutation, useQuery } from 'react-query';
 
 import { notifyError } from '../services/notifications';
 
-import { createTeam, getTeams } from './teams.service';
-import { FormValues, Team } from './types';
+import {
+  createTeam,
+  getTeam,
+  getTeamMemberships,
+  getTeams,
+} from './teams.service';
+import { FormValues, Team, TeamId } from './types';
 
 export function useTeams<T = Team[]>(
   enabled = true,
@@ -29,4 +34,27 @@ export function useAddTeamMutation() {
       },
     }
   );
+}
+
+export function useTeam(id: TeamId, onError?: (error: unknown) => void) {
+  return useQuery(['teams', id], () => getTeam(id), {
+    onError(error) {
+      notifyError('Failure', error as Error, 'Failed retrieving team');
+      if (onError) {
+        onError(error);
+      }
+    },
+  });
+}
+
+export function useTeamMemberships(id: TeamId) {
+  return useQuery(['teams', id, 'memberships'], () => getTeamMemberships(id), {
+    onError(error) {
+      notifyError(
+        'Failure',
+        error as Error,
+        'Failed retrieving team memberships'
+      );
+    },
+  });
 }
