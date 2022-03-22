@@ -9,6 +9,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/portainer/components/Button';
 import {
   Table,
+  TableContent,
   TableHeaderRow,
   TableRow,
 } from '@/portainer/components/datatables/components';
@@ -140,29 +141,22 @@ export function UsersList({ users, onAddUsers }: Props) {
             role={tbodyProps.role}
             style={tbodyProps.style}
           >
-            {page.length > 0 ? (
-              page.map((row) => {
-                prepareRow(row);
-                const { key, className, role, style } = row.getRowProps();
-                return (
-                  <RowProvider context={rowContext} key={key}>
-                    <TableRow<User>
-                      cells={row.cells}
-                      key={key}
-                      className={className}
-                      role={role}
-                      style={style}
-                    />
-                  </RowProvider>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan={columns.length} className="text-center text-muted">
-                  No users.
-                </td>
-              </tr>
-            )}
+            <TableContent
+              emptyContent="No users."
+              prepareRow={prepareRow}
+              rows={page}
+              renderRow={(row, { key, className, role, style }) => (
+                <RowProvider context={rowContext} key={key}>
+                  <TableRow<User>
+                    cells={row.cells}
+                    key={key}
+                    className={className}
+                    role={role}
+                    style={style}
+                  />
+                </RowProvider>
+              )}
+            />
           </tbody>
         </Table>
         <TableFooter>
@@ -178,60 +172,6 @@ export function UsersList({ users, onAddUsers }: Props) {
             </div>
           )}
         </TableFooter>
-
-        {/* <div className="table-responsive">
-          <table className="table table-hover">
-            <thead>
-              <tr>
-                <th>
-                  <a ng-click="orderUsers('Username')">
-                    Name
-                    <span
-                      ng-show="sortTypeUsers == 'Username' && !sortReverseUsers"
-                      className="glyphicon glyphicon-chevron-down"
-                    />
-                    <span
-                      ng-show="sortTypeUsers == 'Username' && sortReverseUsers"
-                      className="glyphicon glyphicon-chevron-up"
-                    />
-                  </a>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                pagination-id="table1"
-                dir-paginate="user in users | filter:state.filterUsers | orderBy:sortTypeUsers:sortReverseUsers | itemsPerPage: state.pagination_count_users"
-              >
-                <td>
-                  {user.Username}
-                  <span style="margin-left: 5px">
-                    <a ng-click="addUser(user)">
-                      <i
-                        className="fa fa-plus-circle space-right"
-                        aria-hidden="true"
-                      />
-                      Add
-                    </a>
-                  </span>
-                </td>
-              </tr>
-              <tr ng-if="!users">
-                <td colSpan="2" className="text-center text-muted">
-                  Loading...
-                </td>
-              </tr>
-              <tr ng-if="users.length === 0 || (users | filter: state.filterUsers).length === 0">
-                <td colSpan="2" className="text-center text-muted">
-                  No users.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div ng-if="users" className="pull-left pagination-controls">
-            <dir-pagination-controls pagination-id="table1" />
-          </div>
-        </div> */}
       </WidgetBody>
     </Widget>
   );
