@@ -4,7 +4,6 @@ import { TableHeaderProps } from 'react-table';
 
 import { Button } from '@/portainer/components/Button';
 
-import { useTableContext } from './TableContainer';
 import styles from './TableHeaderCell.module.css';
 
 interface Props {
@@ -28,8 +27,6 @@ export function TableHeaderCell({
   canFilter,
   renderFilter,
 }: Props) {
-  useTableContext();
-
   return (
     <th role={role} style={style} className={className}>
       <SortWrapper
