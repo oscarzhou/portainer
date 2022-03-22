@@ -9,10 +9,7 @@ import {
 } from 'react-table';
 import { useMutation, useQueryClient } from 'react-query';
 
-import {
-  error as notifyError,
-  success as notifySuccess,
-} from '@/portainer/services/notifications';
+import { notifySuccess } from '@/portainer/services/notifications';
 import { r2a } from '@/react-tools/react2angular';
 import { Checkbox } from '@/portainer/components/form-components/Checkbox';
 import {
@@ -215,13 +212,18 @@ export const TeamsDatatableAngular = r2a(TeamsDatatableContainer, [
 function useRemoveMutation() {
   const queryClient = useQueryClient();
 
-  const deleteMutation = useMutation(async (ids: TeamId[]) => {
-    try {
-      await promiseSequence(ids.map((id) => () => deleteTeam(id)));
-    } catch (err) {
-      notifyError('Failure', err as Error, 'Unable to remove teams');
+  const deleteMutation = useMutation(
+    async (ids: TeamId[]) =>
+      promiseSequence(ids.map((id) => () => deleteTeam(id))),
+    {
+      meta: {
+        error: { title: 'Failure', message: 'Unable to remove team' },
+      },
+      onSuccess() {
+        return queryClient.invalidateQueries(['teams']);
+      },
     }
-  });
+  );
 
   return { handleRemove };
 
@@ -237,7 +239,6 @@ function useRemoveMutation() {
     deleteMutation.mutate(teams, {
       onSuccess: () => {
         notifySuccess('Teams successfully removed', '');
-        queryClient.invalidateQueries(['teams']);
       },
     });
   }
