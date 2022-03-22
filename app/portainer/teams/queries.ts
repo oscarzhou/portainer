@@ -1,7 +1,5 @@
 import { useQuery } from 'react-query';
 
-import { notifyError } from '@/portainer/services/notifications';
-
 import { getTeam, getTeamMemberships, getTeams } from './teams.service';
 import { Team, TeamId } from './types';
 
@@ -22,23 +20,17 @@ export function useTeams<T = Team[]>(
 
 export function useTeam(id: TeamId, onError?: (error: unknown) => void) {
   return useQuery(['teams', id], () => getTeam(id), {
-    onError(error) {
-      notifyError('Failure', error as Error, 'Failed retrieving team');
-      if (onError) {
-        onError(error);
-      }
+    meta: {
+      error: { title: 'Failure', message: 'Unable to load team' },
     },
+    onError,
   });
 }
 
 export function useTeamMemberships(id: TeamId) {
   return useQuery(['teams', id, 'memberships'], () => getTeamMemberships(id), {
-    onError(error) {
-      notifyError(
-        'Failure',
-        error as Error,
-        'Failed retrieving team memberships'
-      );
+    meta: {
+      error: { title: 'Failure', message: 'Unable to load team memberships' },
     },
   });
 }
