@@ -31,6 +31,7 @@ import { ContainerGroup } from '@/azure/types';
 import { Button } from '@/portainer/components/Button';
 import { Authorized } from '@/portainer/hooks/useUser';
 import { Link } from '@/portainer/components/Link';
+import { confirmDeletionAsync } from '@/portainer/services/modal.service/confirm';
 
 import { TableSettings } from './types';
 import { useColumns } from './columns';
@@ -38,7 +39,7 @@ import { useColumns } from './columns';
 export interface Props {
   tableKey: string;
   dataset: ContainerGroup[];
-  onRemoveClick(containers: ContainerGroup[]): void;
+  onRemoveClick(containerIds: string[]): void;
 }
 
 export function ContainersDatatable({
@@ -107,7 +108,9 @@ export function ContainersDatatable({
                 size="small"
                 disabled={selectedFlatRows.length === 0}
                 onClick={() =>
-                  onRemoveClick(selectedFlatRows.map((row) => row.original))
+                  handleRemoveClick(
+                    selectedFlatRows.map((row) => row.original.id)
+                  )
                 }
               >
                 <i className="fa fa-trash-alt space-right" aria-hidden="true" />
@@ -196,6 +199,17 @@ export function ContainersDatatable({
       </div>
     </div>
   );
+
+  async function handleRemoveClick(containerIds: string[]) {
+    const confirmed = await confirmDeletionAsync(
+      'Are you sure you want to delete the selected containers?'
+    );
+    if (!confirmed) {
+      return null;
+    }
+
+    return onRemoveClick(containerIds);
+  }
 
   function handlePageSizeChange(pageSize: number) {
     setPageSize(pageSize);
