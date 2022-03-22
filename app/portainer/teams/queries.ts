@@ -1,14 +1,9 @@
-import { useMutation, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
 
-import { notifyError } from '../services/notifications';
+import { notifyError } from '@/portainer/services/notifications';
 
-import {
-  createTeam,
-  getTeam,
-  getTeamMemberships,
-  getTeams,
-} from './teams.service';
-import { FormValues, Team, TeamId } from './types';
+import { getTeam, getTeamMemberships, getTeams } from './teams.service';
+import { Team, TeamId } from './types';
 
 export function useTeams<T = Team[]>(
   enabled = true,
@@ -23,17 +18,6 @@ export function useTeams<T = Team[]>(
   });
 
   return teams;
-}
-
-export function useAddTeamMutation() {
-  return useMutation(
-    (values: FormValues) => createTeam(values.name, values.leaders),
-    {
-      onError(error) {
-        notifyError('Failure', error as Error, 'Failure to add team');
-      },
-    }
-  );
 }
 
 export function useTeam(id: TeamId, onError?: (error: unknown) => void) {
