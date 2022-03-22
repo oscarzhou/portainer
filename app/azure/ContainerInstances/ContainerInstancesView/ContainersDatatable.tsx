@@ -74,6 +74,9 @@ export function ContainersDatatable({
       },
       selectCheckboxComponent: Checkbox,
       autoResetSelectedRows: false,
+      getRowId(row) {
+        return row.id;
+      },
     },
     useGlobalFilter,
     useSortBy,
