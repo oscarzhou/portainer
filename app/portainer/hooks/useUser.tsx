@@ -125,8 +125,3 @@ export function UserProvider({ children }: UserProviderProps) {
 function isAdmin(user?: User): boolean {
   return !!user && user.Role === 1;
 }
-
-export function useIsAdmin() {
-  const { user } = useUser();
-  return !!user && isAdmin(user);
-}

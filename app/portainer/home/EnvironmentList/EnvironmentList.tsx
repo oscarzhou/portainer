@@ -5,7 +5,6 @@ import { PaginationControls } from '@/portainer/components/pagination-controls';
 import { usePaginationLimitState } from '@/portainer/hooks/usePaginationLimitState';
 import { Environment } from '@/portainer/environments/types';
 import { Button } from '@/portainer/components/Button';
-import { useIsAdmin } from '@/portainer/hooks/useUser';
 import {
   SearchBar,
   useSearchBarState,
@@ -19,6 +18,7 @@ import { TableFooter } from '@/portainer/components/datatables/components/TableF
 import { useDebounce } from '@/portainer/hooks/useDebounce';
 import { useEnvironmentList } from '@/portainer/environments/queries';
 import { useGroups } from '@/portainer/environment-groups/queries';
+import { useUser } from '@/portainer/hooks/useUser';
 
 import { EnvironmentItem } from './EnvironmentItem';
 import { KubeconfigButton } from './KubeconfigButton';
@@ -31,7 +31,7 @@ interface Props {
 }
 
 export function EnvironmentList({ onClickItem, onRefresh }: Props) {
-  const isAdmin = useIsAdmin();
+  const { isAdmin } = useUser();
   const storageKey = 'home_endpoints';
 
   const [searchBarValue, setSearchBarValue] = useSearchBarState(storageKey);
