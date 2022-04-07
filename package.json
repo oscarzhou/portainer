@@ -70,7 +70,7 @@
     "@nxmix/tokenize-ansi": "^3.0.0",
     "@open-amt-cloud-toolkit/ui-toolkit-react": "2.0.0",
     "@reach/menu-button": "^0.16.1",
-    "@uirouter/angularjs": "1.0.11",
+    "@uirouter/angularjs": "1.0.30",
     "@uirouter/react": "^1.0.7",
     "@uirouter/react-hybrid": "^1.0.4",
     "angular": "1.8.2",
