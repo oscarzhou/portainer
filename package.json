@@ -104,7 +104,7 @@
     "core-js": "^3.19.3",
     "fast-json-patch": "^3.1.0",
     "file-saver": "^2.0.5",
-    "filesize": "~3.3.0",
+    "filesize": "~8.0.7",
     "filesize-parser": "^1.5.0",
     "formik": "^2.2.9",
     "i18next": "^21.3.3",
