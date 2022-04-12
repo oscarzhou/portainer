@@ -48,7 +48,7 @@ jobs:
 
       - name: Cat sarif
         run: |
-          echo '${{ toJSON(jobs) }}'
+          echo '${{ toJSON(job) }}'
           ls
           cat snyk.sarif
           echo '${{ toJSON(steps.server-scan.outputs) }}'
