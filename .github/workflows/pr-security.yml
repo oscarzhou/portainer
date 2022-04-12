@@ -46,13 +46,6 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
-      - name: Cat sarif
-        run: |
-          echo '${{ toJSON(job) }}'
-          ls
-          cat snyk.sarif
-          echo '${{ toJSON(steps.server-scan.outputs) }}'
-
       - name: Post to a Slack channel
         id: slack
         uses: slackapi/slack-github-action@v1.18.0
@@ -63,16 +56,21 @@ jobs:
           # For posting a rich message using Block Kit
           payload: |
             {
-              "text": "PR: ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}\nCommit: ${{ github.event.head_commit.url }}\nCode scanning results (Snyk Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}\nCode scanning results (Trivy Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}}",
+              "text": "PR: ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}\nCommit: ${{ github.event.head_commit.url }}\nCode scanning results (Snyk Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}\nCode scanning results (Trivy Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}\ Code scanning alerts (Snyk scan) ${{ github.event.repository.html_url }}/security/code-scanning?query=pr%3A${{ github.event.repository.open_issues }}+tool%3A"Snyk+Open+Source"+is%3Aopen\nCode scanning alerts (Trivy scan) ${{ github.event.repository.html_url }}/security/code-scanning?query=pr%3A${{ github.event.repository.open_issues }}+tool%3A"Trivy+Open+Source"+is%3Aopen",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "PR: ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}\nCommit: ${{ github.event.head_commit.url }}\nCode scanning results (Snyk Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}\nCode scanning results (Trivy Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}"
+                    "text": "${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks"
                   }
                 }
               ]
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
+          
+      - name: Cat sarif
+        run: |
+          ls
+          cat ../../snyk.sarif
