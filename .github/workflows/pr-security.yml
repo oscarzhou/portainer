@@ -21,6 +21,7 @@ jobs:
           sarif_file: snyk.sarif
 
   server-dependencies:
+    id: server-de
     name: Server dependency check
     runs-on: ubuntu-latest
     defaults:
@@ -48,7 +49,7 @@ jobs:
 
       - name: Cat sarif
         run: |
-          echo '${{ jobs.server-dependencies.steps.server-scan.id }}'
+          echo '${{ jobs.server-de.steps.server-scan.id }}'
           ls
           cat snyk.sarif
           echo '${{ toJSON(steps.server-scan.outputs) }}'
