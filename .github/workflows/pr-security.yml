@@ -16,6 +16,7 @@ jobs:
           args: --severity-threshold=high --fail-on=upgradable --sarif-file-output=snyk.sarif
 
       - name: Upload result to GitHub Code Scanning
+        id:
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: snyk.sarif
@@ -56,13 +57,13 @@ jobs:
           # For posting a rich message using Block Kit
           payload: |
             {
-              "text": "PR ${{ github.event.repository.pulls_url }}\n Commit: ${{ github.event.head_commit.url }}\nSnyk summary xx ${{ github.event.pull_request._links.html.href }}/checks?check_run_id=${{ github.server-scan.outputs.result }}",
+              "text": "PR: ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}\nCommit: ${{ github.event.head_commit.url }}\nCode scanning results (Snyk Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}\nCode scanning results (Trivy Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "PR ${{ github.event.repository.pulls_url }}\n Commit: ${{ github.event.head_commit.url }}\nSnyk summary xx ${{ github.event.pull_request._links.html.href }}/checks?check_run_id=${{ github.server-scan.outputs.result }}}"
+                    "text": "PR: ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}\nCommit: ${{ github.event.head_commit.url }}\nCode scanning results (Snyk Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}\nCode scanning results (Trivy Open Source): ${{ github.event.repository.html_url }}/pull/${{ github.event.repository.open_issues }}/checks?check_run_id=${{ github.run_id }}"
                   }
                 }
               ]
