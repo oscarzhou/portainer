@@ -46,6 +46,11 @@ jobs:
         with:
           sarif_file: snyk.sarif
 
+      - name: Cat sarif
+        run: |
+          cat snyk.sarif
+          echo ${{ toJSON(job.server-scan.outputs) }}
+
       - name: Post to a Slack channel
         id: slack
         uses: slackapi/slack-github-action@v1.18.0
