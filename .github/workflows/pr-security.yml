@@ -56,35 +56,16 @@ jobs:
           # For posting a rich message using Block Kit
           payload: |
             {
-              "text": "PR ${{ github.ref }}\n Commit: ${{ github.event.head_commit.url }}\nSnyk summary xx ${{ github.event.pull_request._links.html.href }}/checks?check_run_id=${{ github.server-scan.outputs.result }}",
+              "text": "PR ${{ github.event.pulls_url }}\n Commit: ${{ github.event.head_commit.url }}\nSnyk summary xx ${{ github.event.pull_request._links.html.href }}/checks?check_run_id=${{ github.server-scan.outputs.result }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "PR ${{ github.ref }}\n Commit: ${{ github.event.head_commit.url }}\nSnyk summary xx ${{ github.event.pull_request._links.html.href }}/checks?check_run_id=${{ github.server-scan.outputs.result }}}"
+                    "text": "PR ${{ github.event.pulls_url }}\n Commit: ${{ github.event.head_commit.url }}\nSnyk summary xx ${{ github.event.pull_request._links.html.href }}/checks?check_run_id=${{ github.server-scan.outputs.result }}}"
                   }
                 }
               ]
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
-
-      - name: Dump GitHub context
-        id: github_context_step
-        run: echo '${{ toJSON(github) }}'
-
-      - name: Dump job context
-        run: echo '${{ toJSON(job) }}'
-
-      - name: Dump steps context
-        run: echo '${{ toJSON(steps) }}'
-
-      - name: Dump runner context
-        run: echo '${{ toJSON(runner) }}'
-
-      - name: Dump strategy context
-        run: echo '${{ toJSON(strategy) }}'
-
-      - name: Dump matrix context
-        run: echo '${{ toJSON(matrix) }}' 
