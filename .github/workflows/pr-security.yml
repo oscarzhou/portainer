@@ -48,8 +48,10 @@ jobs:
 
       - name: Cat sarif
         run: |
+          echo '${{ jobs.server-dependencies.steps.server-scan.id }}'
+          ls
           cat snyk.sarif
-          echo ${{ toJSON(job.server-scan.outputs) }}
+          echo '${{ toJSON(steps.server-scan.outputs) }}'
 
       - name: Post to a Slack channel
         id: slack
