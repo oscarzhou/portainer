@@ -41,7 +41,6 @@ jobs:
           args: --severity-threshold=high --sarif-file-output=snyk.sarif --file=./api/go.mod
 
       - name: Upload result to GitHub Code Scanning
-        id: server-scan
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: snyk.sarif
@@ -69,8 +68,3 @@ jobs:
             }
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}       
-
-      - name: Cat sarif
-        run: |
-          ls
-          cat ../../snyk.sarif
