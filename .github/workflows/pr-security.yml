@@ -38,7 +38,10 @@ jobs:
         run: | 
           jqSnykJSON=`echo $(jq -r tostring snyk.json)`
           echo "::set-output name=js_matrix::${jqSnykJSON}"
-          echo ${{ fromJSON(${jqSnykJSON}) }}
+
+      - name: Debug
+        run: |
+          echo $(jq '.vulnerabilities' snyk.json)
 
   # jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
   # result-analysis:
