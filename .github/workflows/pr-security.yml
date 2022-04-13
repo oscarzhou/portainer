@@ -22,7 +22,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --fail-on=upgradable --json-file-output=/github/workspace/js-security-scan-result.json
+          args: --severity-threshold=high --fail-on=upgradable
           json: true
 
       - name: Debug
@@ -33,8 +33,8 @@ jobs:
       - name: Upload js security scan result as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: js-security-scan-result.json
-          path: /home/runner/work/portainer/portainer/js-security-scan-result.json
+          name: snyk.json
+          path: tmp/js-security-scan-result.json
 
 
 
