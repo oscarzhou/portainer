@@ -38,20 +38,21 @@ jobs:
         run: | 
           jqSnykJSON=`echo $(jq -r tostring snyk.json)`
           echo "::set-output name=js_matrix::${jqSnykJSON}"
+          echo ${{ fromJSON(${jqSnykJSON}) }}
 
   # jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
-  result-analysis:
-    name: Analyse scan result
-    needs: [client-dependencies]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{ fromJSON(needs.client-dependencies.outputs.matrix) }}
-    # if: ${{ github.event. }}
-    steps:
-      - name: Display the js result
-        run: |
-          echo ${{ matrix.summary }}
-          echo ${{ matrix.vulnerabilities }}
+  # result-analysis:
+  #   name: Analyse scan result
+  #   needs: [client-dependencies]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix: ${{ fromJSON(needs.client-dependencies.outputs.matrix) }}
+  #   # if: ${{ github.event. }}
+  #   steps:
+  #     - name: Display the js result
+  #       run: |
+  #         echo ${{ matrix.summary }}
+  #         echo ${{ matrix.vulnerabilities }}
 
   # server-dependencies:
   #   name: Server dependency check
