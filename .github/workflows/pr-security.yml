@@ -14,7 +14,8 @@ jobs:
     name: Client dependency check
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.js_matrix }}
+      js: ${{ steps.set-matrix.outputs.js_matrix }}
+      matrix: ${{ steps.set-debug.outputs.matrix }}
     steps:
       - uses: actions/checkout@master
 
@@ -37,11 +38,16 @@ jobs:
         id: set-matrix
         run: | 
           jqSnykJSON=`echo $(jq '.vulnerabilities' snyk.json)`
+          jqSnykJSON="${jqSnykJSON//'%'/'%25'}"
+          jqSnykJSON="${jqSnykJSON//$'\n'/'%0A'}"
+          jqSnykJSON="${jqSnykJSON//$'\r'/'%0D'}"
           echo "::set-output name=js_matrix::${jqSnykJSON}"
 
       - name: Debug
+        id: set-debug
         run: |
-          echo $(jq '.vulnerabilities' snyk.json)
+          echo ${{ steps.set-matrix.outputs.js_matrix }}
+          echo "::set-output name=matrix::'oscar'"
 
   # jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
   result-analysis:
@@ -49,6 +55,7 @@ jobs:
     needs: [client-dependencies]
     runs-on: ubuntu-latest
     strategy:
+      # matrix: "${{ needs.client-dependencies.outputs.js }}"
       matrix: "${{ needs.client-dependencies.outputs.matrix }}"
     # if: ${{ github.event. }}
     steps:
