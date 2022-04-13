@@ -25,6 +25,11 @@ jobs:
           args: --severity-threshold=high --fail-on=upgradable --json-file-output=js-security-scan-result.json
           json: true
 
+      - name: Debug
+        run: | 
+          pwd
+          ls -lha
+
       - name: Upload js security scan result as artifact
         uses: actions/upload-artifact@v3
         with:
@@ -32,29 +37,30 @@ jobs:
           path: /home/runner/work/portainer/portainer/js-security-scan-result.json
 
 
-  server-dependencies:
-    name: Server dependency check
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./api
-    steps:
-      - uses: actions/checkout@master
 
-      - name: Download dependencies
-        run: go get -v -d
+  # server-dependencies:
+  #   name: Server dependency check
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./api
+  #   steps:
+  #     - uses: actions/checkout@master
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
-        continue-on-error: true # To make sure that SARIF upload gets called
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --json-file-output=go-security-scan-result.json --file=./api/go.mod
-          json: true
+  #     - name: Download dependencies
+  #       run: go get -v -d
 
-      - name: Upload go security scan result as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: go-security-scan-result.json
-          path: /home/runner/work/portainer/portainer/go-security-scan-result.json
+  #     - name: Run Snyk to check for vulnerabilities
+  #       uses: snyk/actions/golang@master
+  #       continue-on-error: true # To make sure that SARIF upload gets called
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  #       with:
+  #         args: --severity-threshold=high --json-file-output=go-security-scan-result.json --file=./api/go.mod
+  #         json: true
+
+  #     - name: Upload go security scan result as artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: go-security-scan-result.json
+  #         path: /home/runner/work/portainer/portainer/go-security-scan-result.json
