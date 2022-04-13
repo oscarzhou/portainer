@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       js: ${{ steps.set-matrix.outputs.js_matrix }}
-      matrix: ${{ steps.set-debug.outputs.matrix }}
     steps:
       - uses: actions/checkout@master
 
@@ -37,7 +36,7 @@ jobs:
       - name: Analyse the result
         id: set-matrix
         run: | 
-          jqSnykJSON=`echo $(jq '.vulnerabilities' snyk.json)`
+          jqSnykJSON=`echo $(jq -c '.vulnerabilities' snyk.json)`
           jqSnykJSON="${jqSnykJSON//'%'/'%25'}"
           jqSnykJSON="${jqSnykJSON//$'\n'/'%0A'}"
           jqSnykJSON="${jqSnykJSON//$'\r'/'%0D'}"
@@ -47,7 +46,6 @@ jobs:
         id: set-debug
         run: |
           echo ${{ steps.set-matrix.outputs.js_matrix }}
-          echo "::set-output name=matrix::'oscar'"
 
   # jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
   result-analysis:
@@ -55,8 +53,7 @@ jobs:
     needs: [client-dependencies]
     runs-on: ubuntu-latest
     strategy:
-      # matrix: "${{ needs.client-dependencies.outputs.js }}"
-      matrix: "${{ needs.client-dependencies.outputs.matrix }}"
+      matrix: "${{ needs.client-dependencies.outputs.js }}"
     # if: ${{ github.event. }}
     steps:
       - name: Display the js result
