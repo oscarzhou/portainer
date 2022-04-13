@@ -37,7 +37,7 @@ jobs:
         id: set-matrix
         run: | 
           snykJSON=$(cat snyk.json)
-          echo ${{ snykJSON }}
+          echo "${snykJSON}"
           echo "::set-output name=js_matrix::${snykJSON//'%'/'%25'}"
 
       - name: Debug
