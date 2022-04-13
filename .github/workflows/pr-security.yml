@@ -42,10 +42,10 @@ jobs:
           jqSnykJSON="${jqSnykJSON//$'\r'/'%0D'}"
           echo "::set-output name=js_matrix::${jqSnykJSON}"
 
-      - name: Debug
-        id: set-debug
-        run: |
-          echo ${{ steps.set-matrix.outputs.js_matrix }}
+  # - name: Debug
+  #   id: set-debug
+  #   run: |
+  #     echo ${{ steps.set-matrix.outputs.js_matrix }}
 
   # jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
   result-analysis:
