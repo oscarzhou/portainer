@@ -36,7 +36,7 @@ jobs:
       - name: Analyse the result
         id: set-matrix
         run: | 
-          jqSnykJSON=`echo $(jq -r tostring snyk.json)`
+          jqSnykJSON=`echo $(jq '.vulnerabilities' snyk.json)`
           echo "::set-output name=js_matrix::${jqSnykJSON}"
 
       - name: Debug
@@ -44,18 +44,17 @@ jobs:
           echo $(jq '.vulnerabilities' snyk.json)
 
   # jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
-  # result-analysis:
-  #   name: Analyse scan result
-  #   needs: [client-dependencies]
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix: ${{ fromJSON(needs.client-dependencies.outputs.matrix) }}
-  #   # if: ${{ github.event. }}
-  #   steps:
-  #     - name: Display the js result
-  #       run: |
-  #         echo ${{ matrix.summary }}
-  #         echo ${{ matrix.vulnerabilities }}
+  result-analysis:
+    name: Analyse scan result
+    needs: [client-dependencies]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.client-dependencies.outputs.matrix) }}
+    # if: ${{ github.event. }}
+    steps:
+      - name: Display the js result
+        run: |
+          echo ${{ matrix }}
 
   # server-dependencies:
   #   name: Server dependency check
