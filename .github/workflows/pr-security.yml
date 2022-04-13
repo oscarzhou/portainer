@@ -37,7 +37,8 @@ jobs:
         id: set-matrix
         run: | 
           snykJSON=$(cat snyk.json)
-          echo "::set-output name=js_matrix::${snykJSON}"
+          jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
+          echo "::set-output name=js_matrix::${jqSnykJSON}"
 
       - name: Debug
         run: |
