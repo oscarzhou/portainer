@@ -13,6 +13,8 @@ jobs:
   client-dependencies:
     name: Client dependency check
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@master
 
@@ -25,40 +27,56 @@ jobs:
           args: --severity-threshold=high --fail-on=upgradable
           json: true
 
-      - name: Debug
-        run: | 
-          pwd
-          ls -lha
-
       - name: Upload js security scan result as artifact
         uses: actions/upload-artifact@v3
         with:
           name: js-security-scan-result.json
           path: snyk.json
 
-  server-dependencies:
-    name: Server dependency check
+      - name: Analyse the result
+        id: set-matrix
+        run: | 
+          snykJSON=$(cat snyk.json)
+          echo "::set-output name=matrix::${snykJSON//'%'/'%25'}"
+
+  result-analysis:
+    name: Analyse scan result
+    needs: 
+      - client-dependencies
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./api
+    strategy:
+      matrix:
+        client: ${{fromJson(needs.client-dependencies.outputs.matrix)}}
+    # if: ${{ github.event. }}
     steps:
-      - uses: actions/checkout@master
+      - name: Display the js result
+        run: |
+          echo ${{ matrix.client.summary }}
+          echo ${{ matrix.client.vulnerabilities }}
 
-      - name: Download dependencies
-        run: go get -v -d
+  # server-dependencies:
+  #   name: Server dependency check
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./api
+  #   steps:
+  #     - uses: actions/checkout@master
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
-        continue-on-error: true # To make sure that artifact upload gets called
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --file=./api/go.mod
-          json: true
+  #     - name: Download dependencies
+  #       run: go get -v -d
 
-      - name: Upload go security scan result as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: go-security-scan-result.json
-          path: snyk.json
+  #     - name: Run Snyk to check for vulnerabilities
+  #       uses: snyk/actions/golang@master
+  #       continue-on-error: true # To make sure that artifact upload gets called
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  #       with:
+  #         args: --severity-threshold=high --file=./api/go.mod
+  #         json: true
+
+  #     - name: Upload go security scan result as artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: go-security-scan-result.json
+  #         path: snyk.json
