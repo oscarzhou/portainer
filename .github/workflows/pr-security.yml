@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        client: ${{fromJson(needs.client-dependencies.outputs.matrix)}}
+        client: ${{fromJSON(needs.client-dependencies.outputs.matrix)}}
     # if: ${{ github.event. }}
     steps:
       - name: Display the js result
