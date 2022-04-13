@@ -46,14 +46,13 @@ jobs:
       - client-dependencies
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        client: ${{ fromJSON(needs.client-dependencies.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.client-dependencies.outputs.matrix) }}
     # if: ${{ github.event. }}
     steps:
       - name: Display the js result
         run: |
-          echo ${{ matrix.client.summary }}
-          echo ${{ matrix.client.vulnerabilities }}
+          echo ${{ matrix.summary }}
+          echo ${{ matrix.vulnerabilities }}
 
   # server-dependencies:
   #   name: Server dependency check
