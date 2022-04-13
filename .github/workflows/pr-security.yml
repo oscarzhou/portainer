@@ -49,7 +49,7 @@ jobs:
     needs: [client-dependencies]
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ needs.client-dependencies.outputs.matrix }}
+      matrix: "${{ needs.client-dependencies.outputs.matrix }}"
     # if: ${{ github.event. }}
     steps:
       - name: Display the js result
