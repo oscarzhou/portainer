@@ -22,13 +22,14 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --fail-on=upgradable --json-file-output=/tmp/js-security-scan-result.json
+          args: --severity-threshold=high --fail-on=upgradable --json-file-output=js-security-scan-result.json
+          json: true
 
       - name: Upload js security scan result as artifact
         uses: actions/upload-artifact@v3
         with:
           name: js-security-scan-result.json
-          path: /tmp/js-security-scan-result.json
+          path: /home/runner/work/portainer/portainer/js-security-scan-result.json
 
 
   server-dependencies:
@@ -49,10 +50,11 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --json-file-output=/tmp/go-security-scan-result.json --file=./api/go.mod
+          args: --severity-threshold=high --json-file-output=go-security-scan-result.json --file=./api/go.mod
+          json: true
 
       - name: Upload go security scan result as artifact
         uses: actions/upload-artifact@v3
         with:
           name: go-security-scan-result.json
-          path: /tmp/go-security-scan-result.json
+          path: /home/runner/work/portainer/portainer/go-security-scan-result.json
