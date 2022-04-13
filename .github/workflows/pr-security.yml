@@ -22,7 +22,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --fail-on=upgradable --json-file-output=js-security-scan-result.json
+          args: --severity-threshold=high --fail-on=upgradable --json-file-output=/tmp/js-security-scan-result.json
 
       - name: Upload js security scan result as artifact
         uses: actions/upload-artifact@v3
@@ -49,7 +49,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --json-file-output=go-security-scan-result.json --file=./api/go.mod
+          args: --severity-threshold=high --json-file-output=/tmp/go-security-scan-result.json --file=./api/go.mod
 
       - name: Upload go security scan result as artifact
         uses: actions/upload-artifact@v3
