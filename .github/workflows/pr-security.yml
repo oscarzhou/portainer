@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: js-security-scan-result.json
-          path: /snyk.json
+          path: snyk.json
 
 
 
