@@ -22,7 +22,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --fail-on=upgradable --json-file-output=js-security-scan-result.json
+          args: --severity-threshold=high --fail-on=upgradable --json-file-output=/github/workspace/js-security-scan-result.json
           json: true
 
       - name: Debug
