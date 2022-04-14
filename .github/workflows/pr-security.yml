@@ -43,7 +43,7 @@ jobs:
           echo "::set-output name=js_matrix::${jqSnykJSON}"
           vulnCount=`$(jq -c '.vulnerabilities' snyk.json | jq '. | length')`
           echo "vuln count= ${vulnCount}"
-          echo ${{fromJSON(steps.set-matrix.outputs.js_matrix)}}
+          echo ${{fromJSON(jqSnykJSON)}}
 
 
   # result-analysis:
