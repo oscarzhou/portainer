@@ -14,7 +14,7 @@ jobs:
     name: Client dependency check
     runs-on: ubuntu-latest
     outputs:
-      js: ${{ steps.set-matrix.outputs.js_matrix }}
+      js: ${{ steps.set-matrix.outputs.js_summary }}
     steps:
       - uses: actions/checkout@master
 
@@ -36,28 +36,20 @@ jobs:
       - name: Analyse the result
         id: set-matrix
         run: | 
-          jqSnykJSON=`echo $(jq -c '.vulnerabilities' snyk.json)`
-          jqSnykJSON="${jqSnykJSON//'%'/'%25'}"
-          jqSnykJSON="${jqSnykJSON//$'\n'/'%0A'}"
-          jqSnykJSON="${jqSnykJSON//$'\r'/'%0D'}"
-          echo "::set-output name=js_matrix::${jqSnykJSON}"
-          vulnCount=`$(jq -c '.vulnerabilities' snyk.json | jq '. | length')`
-          echo "vuln count= ${vulnCount}"
-          echo ${{fromJSON(jqSnykJSON)}}
+          summary=$(docker run --rm -v $PWD:/data oscarzhou/scan-report:0.1.0 -action=summary -report-type=snyk -path="/data/js-snyk.json")
+          echo "::set-output name=js_summary::${summary}"
 
-
-  # result-analysis:
-  #   name: Analyse scan result
-  #   needs: [client-dependencies]
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix: 
-  #       js: ${{fromJSON(needs.client-dependencies.outputs.js)}}
-  #   # if: ${{ github.event. }}
-  #   steps:
-  #     - name: Display the js result
-  #       run: |
-  #         echo '${{ matrix.js }}' | jq '. | length'
+  result-analysis:
+    name: Analyse scan result
+    needs: [client-dependencies]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        js: ${{fromJSON(needs.client-dependencies.outputs.js)}}
+    steps:
+      - name: Display the js result
+        run: |
+          echo ${{ matrix.js }}
 
   # server-dependencies:
   #   name: Server dependency check
