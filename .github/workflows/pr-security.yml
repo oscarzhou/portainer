@@ -36,11 +36,7 @@ jobs:
       - name: Analyse the result
         id: set-matrix
         run: | 
-          ls -lha
-          pwd
-          content=$(docker run --rm oscarzhou/scan-report:0.1.0 -action=ls -path=/)
-          echo ${content}
-          summary=$(docker run --rm -v /:/data oscarzhou/scan-report:0.1.0 -action=summary -report-type=snyk -path="/data/snyk.json")
+          summary=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.0 -action=summary -report-type=snyk -path="/data/snyk.json")
           echo "::set-output name=js_summary::${summary}"
 
   result-analysis:
