@@ -42,12 +42,6 @@ jobs:
           jqSnykJSON="${jqSnykJSON//$'\r'/'%0D'}"
           echo "::set-output name=js_matrix::${jqSnykJSON}"
 
-  # - name: Debug
-  #   id: set-debug
-  #   run: |
-  #     echo ${{ steps.set-matrix.outputs.js_matrix }}
-
-  # jqSnykJSON=`echo $(jq -r . <<< "$snykJSON")`
   result-analysis:
     name: Analyse scan result
     needs: [client-dependencies]
@@ -59,7 +53,7 @@ jobs:
     steps:
       - name: Display the js result
         run: |
-          echo ${{ matrix.js }}
+          echo ${{ matrix.js }} | jq '. | length'
 
   # server-dependencies:
   #   name: Server dependency check
