@@ -14,7 +14,7 @@ jobs:
     name: Client dependency check
     runs-on: ubuntu-latest
     outputs:
-      js: ${{ steps.set-matrix.outputs.js_summary }}
+      js: ${{ steps.set-matrix.outputs.js_result }}
     steps:
       - uses: actions/checkout@master
 
@@ -36,8 +36,8 @@ jobs:
       - name: Analyse the result
         id: set-matrix
         run: | 
-          summary=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.0 -action=summary -report-type=snyk -path="/data/snyk.json")
-          echo "::set-output name=js_summary::${summary}"
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.1 -action=summary -report-type=snyk -path="/data/snyk.json")
+          echo "::set-output name=js_result::${result}"
 
   result-analysis:
     name: Analyse scan result
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        js: ${{ needs.client-dependencies.outputs.js }}
+        js: ${{fromJSON(needs.client-dependencies.outputs.js)}}
     steps:
       - name: Display the js result
         run: |
