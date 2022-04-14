@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
-        js: ${{fromJSON(needs.client-dependencies.outputs.js)}}
+        js: ${{ needs.client-dependencies.outputs.js }}
     steps:
       - name: Display the js result
         run: |
