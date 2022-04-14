@@ -53,12 +53,13 @@ jobs:
     needs: [client-dependencies]
     runs-on: ubuntu-latest
     strategy:
-      matrix: "${{fromJSON(needs.client-dependencies.outputs.js)}}"
+      matrix: 
+        js: ${{fromJSON(needs.client-dependencies.outputs.js)}}
     # if: ${{ github.event. }}
     steps:
       - name: Display the js result
         run: |
-          echo ${{ matrix }}
+          echo ${{ matrix.js }}
 
   # server-dependencies:
   #   name: Server dependency check
