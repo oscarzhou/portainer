@@ -41,7 +41,6 @@ jobs:
           jqSnykJSON="${jqSnykJSON//$'\n'/'%0A'}"
           jqSnykJSON="${jqSnykJSON//$'\r'/'%0D'}"
           echo "::set-output name=js_matrix::${jqSnykJSON}"
-        run: |
           vulnCount=`$(jq -c '.vulnerabilities' snyk.json | jq '. | length')`
           echo "vuln count= ${vulnCount}"
           echo ${{fromJSON(steps.set-matrix.outputs.js_matrix)}}
