@@ -39,13 +39,19 @@ jobs:
           result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
 
+
+      - name: Dump context json
+        id: github_context_step
+        run: echo '${{ toJSON(github) }}'
+
+
   result-analysis:
     name: Analyse scan result
     needs: client-dependencies
     runs-on: ubuntu-latest
-    # if: | 
-    #   github.ref == 'refs/heads/develop' 
-    #     || github.ref == 'refs/heads/security-scan-ee'
+    if: >- 
+      github.ref == 'refs/heads/develop' ||
+      github.ref == 'refs/heads/security-scan-ee'
     strategy:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
@@ -64,13 +70,13 @@ jobs:
           # For posting a rich message using Block Kit
           payload: |
             {
-              "text": "Code Scanning Result: ${{ job.status }}\n${{ matrix.js.summary }}",
+              "text": "Code Scanning Result: ${{ matrix.js.status }}\n${{ matrix.js.summary }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Code Scanning Result: ${{ job.status }}\n${{ matrix.js.summary }}"
+                    "text": "Code Scanning Result: ${{ matrix.js.status }}\n${{ matrix.js.summary }}"
                   }
                 }
               ]
