@@ -99,7 +99,10 @@ jobs:
           github.head_ref != 'security-scan-ee' && 
           (matrix.js.status == 'failure' ||
           matrix.go.status == 'failure')
-        run: exit 1
+        run: |
+          echo "JS dependency check: ${{ matrix.js.status }}"
+          echo "Go dependency check: ${{ matrix.go.status }}"
+          exit 1
 
       - name: Post the result to a Slack channel
         if: >- 
