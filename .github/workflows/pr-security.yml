@@ -43,17 +43,24 @@ jobs:
           result=`echo $(echo ${result} | jq -c '.')`
           echo "::set-output name=js_result::${result}"
           echo $result
+          echo $result | jq .
 
   result-analysis:
     name: Analyse scan result
-    needs: [client-dependencies]
+    needs: client-dependencies
     runs-on: ubuntu-latest
-    strategy:
-      js: ${{ fromJSON(needs.client-dependencies.outputs.js) }}
+    # strategy:
+    #   matrix: 
+    #     js: '${{ fromJSON(needs.client-dependencies.outputs.js) }}'
     steps:
       - name: Display the js result
         run: |
-          echo ${{ matrix }}
+          result='${{needs.client-dependencies.outputs.js}}'
+          echo $result
+          echo $result | jq .
+
+  #  echo ${{ matrix.js }}
+
 
   # server-dependencies:
   #   name: Server dependency check
