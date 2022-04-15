@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     if: >- 
       github.ref == 'refs/heads/develop' ||
-      github.ref == 'refs/heads/security-scan-ee'
+      github.head_ref == 'security-scan-ee'
     strategy:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
