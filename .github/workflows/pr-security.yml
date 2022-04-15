@@ -72,8 +72,9 @@ jobs:
         if: >-
           github.ref != 'refs/heads/develop' && 
           github.head_ref != 'security-scan-ee'
+        env:
+          GITHUB_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          gh auth login
           gh run download -n js-security-scan-develop-result.json
           ls -lha
           pwd
