@@ -77,6 +77,9 @@ jobs:
         run: |
           gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
           mv ./snyk.json ./js-snyk-develop.json
+          echo ${{ github.run_id }}
+          gh run download -n js-security-scan-${{ github.run_id }}-result.json -R ${{ github.repository }}
+          mv ./snyk.json ./js-snyk-current.json
           ls -lha
       # - name: Download artifact from current workflow
       #   if: >-
@@ -87,8 +90,6 @@ jobs:
       #     name: js-security-scan-
       #     path: /tmp
       
-      #     gh run download -n js-security-scan-${{github.run_id}}-result.json -R ${{ github.repository }}
-      #     mv ./snyk.json ./js-snyk-current.json
 
       - name: Post the result to a Slack channel
         if: >- 
