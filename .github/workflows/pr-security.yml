@@ -27,10 +27,22 @@ jobs:
           args: --severity-threshold=high --fail-on=upgradable
           json: true
 
+      - name: Upload js security scan result as artifact on develop
+        uses: actions/upload-artifact@v3
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
+        with:
+          name: js-security-scan-develop-result.json
+          path: snyk.json
+
       - name: Upload js security scan result as artifact
         uses: actions/upload-artifact@v3
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
         with:
-          name: js-security-scan-result.json
+          name: js-security-scan-${{github.run_id}}-result.json
           path: snyk.json
 
       - name: Analyse the result
@@ -38,7 +50,6 @@ jobs:
         run: | 
           result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
-
 
       - name: Dump context json
         id: github_context_step
