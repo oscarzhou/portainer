@@ -36,14 +36,12 @@ jobs:
       - name: Analyse the result
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.1 -action=summary -report-type=snyk -path="/data/snyk.json")
-          result="${result//'%'/'%25'}"
-          result="${result//$'\n'/'%0A'}"
-          result="${result//$'\r'/'%0D'}"
-          result=`echo [$(echo ${result} | jq -c '.')]`
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+        # result="${result//'%'/'%25'}"
+        # result="${result//$'\n'/'%0A'}"
+        # result="${result//$'\r'/'%0D'}"
+        # result=`echo [$(echo ${result} | jq -c '.')]`
           echo "::set-output name=js_result::${result}"
-          echo $result
-          echo $result | jq .
 
   result-analysis:
     name: Analyse scan result
@@ -55,7 +53,7 @@ jobs:
     steps:
       - name: Display the js result
         run: |
-          echo ${{ matrix.js }}
+          echo ${{ matrix.js.summary }}
 
 
 
