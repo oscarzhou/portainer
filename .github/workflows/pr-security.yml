@@ -37,9 +37,6 @@ jobs:
         id: set-matrix
         run: | 
           result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.1 -action=summary -report-type=snyk -path="/data/snyk.json")
-          result="${result//'%'/'%25'}"
-          result="${result//$'\n'/'%0A'}"
-          result="${result//$'\r'/'%0D'}"
           echo "::set-output name=js_result::${result}"
 
   result-analysis:
@@ -47,12 +44,11 @@ jobs:
     needs: [client-dependencies]
     runs-on: ubuntu-latest
     strategy:
-      matrix: 
-        js: ${{fromJSON(needs.client-dependencies.outputs.js)}}
+      matrix: ${{fromJSON(needs.client-dependencies.outputs.js)}}
     steps:
       - name: Display the js result
         run: |
-          echo ${{ matrix.js }}
+          echo ${{ matrix }}
 
   # server-dependencies:
   #   name: Server dependency check
