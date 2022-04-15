@@ -75,7 +75,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          gh run download -n js-security-scan-develop-result.json
+          gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
           ls -lha
           pwd
 
