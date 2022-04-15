@@ -40,7 +40,7 @@ jobs:
           result="${result//'%'/'%25'}"
           result="${result//$'\n'/'%0A'}"
           result="${result//$'\r'/'%0D'}"
-          result=`echo $(echo ${result} | jq -c '.')`
+          result=`echo [$(echo ${result}] | jq -c '.')`
           echo "::set-output name=js_result::${result}"
           echo $result
           echo $result | jq .
@@ -49,17 +49,14 @@ jobs:
     name: Analyse scan result
     needs: client-dependencies
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix: 
-    #     js: '${{ fromJSON(needs.client-dependencies.outputs.js) }}'
+    strategy:
+      matrix: 
+        js: ${{fromJson(needs.client-dependencies.outputs.js)}}
     steps:
       - name: Display the js result
         run: |
-          result='${{needs.client-dependencies.outputs.js}}'
-          echo $result
-          echo $result | jq .
+          echo ${{ matrix.js }}
 
-  #  echo ${{ matrix.js }}
 
 
   # server-dependencies:
