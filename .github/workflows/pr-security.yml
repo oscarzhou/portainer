@@ -70,7 +70,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Code Scanning Result: ${{ job.status }}\n${{ matrix.js.summary }}",
+                    "text": "Code Scanning Result: ${{ job.status }}\n${{ matrix.js.summary }}"
                   }
                 }
               ]
