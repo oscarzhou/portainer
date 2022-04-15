@@ -76,8 +76,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
-          ls -lha
-          pwd
+          mv ./snyk.json ./js-snyk-develop.json
+          gh run download -n js-security-scan-${{github.run_id}}-result.json -R ${{ github.repository }}
+          mv ./snyk.json ./js-snyk-current.json
 
       - name: Post the result to a Slack channel
         if: >- 
