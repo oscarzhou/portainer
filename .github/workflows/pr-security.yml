@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - develop
+      - security-scan-ee
   schedule:
     - cron: '30 * * * *'
 jobs:
@@ -60,9 +61,6 @@ jobs:
     name: Analyse scan result
     needs: client-dependencies
     runs-on: ubuntu-latest
-    if: >- 
-      github.ref == 'refs/heads/develop' ||
-      github.head_ref == 'security-scan-ee'
     strategy:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
@@ -71,8 +69,19 @@ jobs:
         run: |
           echo ${{ matrix.js.summary }}
 
+      - name: Download artifacts from develop branch
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        run: |
+          gh run download -n js-security-scan-develop-result.json
+          ls -lha
+          pwd
+
       - name: Post the result to a Slack channel
-        id: slack
+        if: >- 
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         uses: slackapi/slack-github-action@v1.18.0
         with:
           # Slack channel id, channel name, or user id to post message.
