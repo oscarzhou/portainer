@@ -39,29 +39,71 @@ jobs:
           result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
 
-
       - name: Dump context json
         id: github_context_step
         run: echo '${{ toJSON(github) }}'
 
+  server-dependencies:
+    name: Server dependency check
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.set-matrix.outputs.go_result }}
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Download dependencies
+        run: go get -v -d
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/golang@master
+        continue-on-error: true # To make sure that artifact upload gets called
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=./api/go.mod
+          json: true
+
+      - name: Upload go security scan result as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: go-security-scan-result.json
+          path: snyk.json
+
+      - name: Analyse the result
+        id: set-matrix
+        run: | 
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          echo "::set-output name=go_result::${result}"
 
   result-analysis:
     name: Analyse scan result
-    needs: client-dependencies
+    needs: [client-dependencies, server-dependencies]
     runs-on: ubuntu-latest
-    if: >- 
-      github.ref == 'refs/heads/develop' ||
-      github.head_ref == 'security-scan-ee'
     strategy:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
+        go: ${{fromJson(needs.server-dependencies.outputs.go)}}
     steps:
-      - name: Display the js result
+      - name: Display the js and go result
         run: |
           echo ${{ matrix.js.summary }}
+          echo ${{ matrix.go.summary }}
+
+      - name: Check job status
+        if: >-
+          github.ref != 'refs/heads/develop' &&
+          github.head_ref != 'security-scan-ee' && 
+          (matrix.js.status == 'failure' ||
+          matrix.go.status == 'failure')
+        run: exit 1
 
       - name: Post the result to a Slack channel
-        id: slack
+        if: >- 
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         uses: slackapi/slack-github-action@v1.18.0
         with:
           # Slack channel id, channel name, or user id to post message.
@@ -70,13 +112,13 @@ jobs:
           # For posting a rich message using Block Kit
           payload: |
             {
-              "text": "Code Scanning Result: ${{ matrix.js.status }}\n${{ matrix.js.summary }}",
+              "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Code Scanning Result: ${{ matrix.js.status }}\n${{ matrix.js.summary }}"
+                    "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}"
                   }
                 }
               ]
@@ -85,30 +127,3 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
 
-
-  # server-dependencies:
-  #   name: Server dependency check
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ./api
-  #   steps:
-  #     - uses: actions/checkout@master
-
-  #     - name: Download dependencies
-  #       run: go get -v -d
-
-  #     - name: Run Snyk to check for vulnerabilities
-  #       uses: snyk/actions/golang@master
-  #       continue-on-error: true # To make sure that artifact upload gets called
-  #       env:
-  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  #       with:
-  #         args: --severity-threshold=high --file=./api/go.mod
-  #         json: true
-
-  #     - name: Upload go security scan result as artifact
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: go-security-scan-result.json
-  #         path: snyk.json
