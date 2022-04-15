@@ -37,7 +37,12 @@ jobs:
         id: set-matrix
         run: | 
           result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.1 -action=summary -report-type=snyk -path="/data/snyk.json")
+          result="${result//'%'/'%25'}"
+          result="${result//$'\n'/'%0A'}"
+          result="${result//$'\r'/'%0D'}"
+          result=`echo $(echo ${result} | jq -c '.')`
           echo "::set-output name=js_result::${result}"
+          echo $result
 
   result-analysis:
     name: Analyse scan result
