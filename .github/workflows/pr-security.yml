@@ -72,12 +72,10 @@ jobs:
         if: >-
           github.ref != 'refs/heads/develop' && 
           github.head_ref != 'security-scan-ee'
-        env:
-          GITHUB_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
           ls -lha
-          echo ${GITHUB_TOKEN}
-          echo ${GITHUB_TOKEN} > ghtoken.txt
+          echo ${{ secrets.SNYK_TOKEN }}
+          echo ${{ secrets.SNYK_TOKEN }} > ghtoken.txt
           ls -lha
           cat ghtoken.txt
           gh auth login --with-token < ghtoken.txt
