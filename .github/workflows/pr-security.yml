@@ -10,12 +10,14 @@ on:
       - security-scan-ee
   schedule:
     - cron: '30 * * * *'
+    
 jobs:
   client-dependencies:
     name: Client dependency check
     runs-on: ubuntu-latest
     outputs:
       js: ${{ steps.set-matrix.outputs.js_result }}
+      jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
       - uses: actions/checkout@master
 
@@ -28,17 +30,52 @@ jobs:
           args: --severity-threshold=high --fail-on=upgradable
           json: true
 
-      - name: Upload js security scan result as artifact
+      - name: Upload js security scan result as artifact on develop
         uses: actions/upload-artifact@v3
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         with:
-          name: js-security-scan-result.json
+          name: js-security-scan-develop-result
           path: snyk.json
 
-      - name: Analyse the result
+      - name: Upload js security scan result as artifact
+        uses: actions/upload-artifact@v3
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        with:
+          name: js-security-scan-feat-result
+          path: snyk.json
+
+      - name: Analyse the js result
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
+
+      - name: Download artifacts from develop branch
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          mv ./snyk.json ./js-snyk-feature.json
+          gh run download -n js-security-scan-develop-result -R ${{ github.repository }}
+          mv ./snyk.json ./js-snyk-develop.json
+
+      - name: Analyse the js diff result
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        id: set-diff-matrix
+        run: | 
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
+          echo "::set-output name=js_diff_result::${result}"
 
       - name: Dump context json
         id: github_context_step
@@ -49,6 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       go: ${{ steps.set-matrix.outputs.go_result }}
+      godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
     defaults:
       run:
         working-directory: ./api
@@ -67,22 +105,89 @@ jobs:
           args: --severity-threshold=high --file=./api/go.mod
           json: true
 
-      - name: Upload go security scan result as artifact
+      - name: Upload go security scan result as artifact on develop
         uses: actions/upload-artifact@v3
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         with:
-          name: go-security-scan-result.json
+          name: go-security-scan-develop-result
           path: snyk.json
 
-      - name: Analyse the result
+      - name: Upload go security scan result as artifact
+        uses: actions/upload-artifact@v3
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        with:
+          name: go-security-scan-feat-result
+          path: snyk.json
+
+      - name: Analyse the go result
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=go_result::${result}"
+
+      - name: Download artifacts from develop branch
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          mv ./snyk.json ./go-snyk-feature
+          gh run download -n go-security-scan-develop-result.json -R ${{ github.repository }}
+          mv ./snyk.json ./go-snyk-develop.json
+        # check if the develop file is downloaded or not 
+
+      - name: Analyse the go diff result
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        id: set-diff-matrix
+        run: | 
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="./data/go-snyk-develop.json" -output-type=matrix)
+          echo "::set-output name=go_diff_result::${result}"
+          
+  result-analysis-compared-to-develop:
+    name: Analyse scan result compared to develop
+    needs: client-dependencies
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref != 'refs/heads/develop' && 
+      github.head_ref != 'security-scan-ee'
+    strategy:
+      matrix: 
+        jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
+        godiff: ${{fromJson(needs.client-dependencies.outputs.godiff)}}
+    steps:
+      - name: Display the js and go result
+        run: |
+          echo ${{ matrix.jsdiff.summary }}
+          echo ${{ matrix.godiff.summary }}
+
+      - name: Check job status of diff result
+        if: >-
+          github.ref != 'refs/heads/develop' &&
+          github.head_ref != 'security-scan-ee' && 
+          (matrix.jsdiff.status == 'failure' || 
+          matrix.godiff.status == 'failure')
+        run: |
+          echo ${{ matrix.jsdiff.summary }}
+          echo ${{ matrix.godiff.summary }}
+          exit 1
 
   result-analysis:
     name: Analyse scan result
     needs: [client-dependencies, server-dependencies]
     runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/develop' ||
+      github.head_ref == 'security-scan-ee'
     strategy:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
@@ -93,21 +198,12 @@ jobs:
           echo ${{ matrix.js.summary }}
           echo ${{ matrix.go.summary }}
 
-      - name: Check job status
-        if: >-
-          github.ref != 'refs/heads/develop' &&
-          github.head_ref != 'security-scan-ee' && 
-          (matrix.js.status == 'failure' ||
-          matrix.go.status == 'failure')
-        run: |
-          echo "JS dependency check: ${{ matrix.js.status }}"
-          echo "Go dependency check: ${{ matrix.go.status }}"
-          exit 1
-
       - name: Post the result to a Slack channel
         if: >- 
-          github.ref == 'refs/heads/develop' ||
-          github.head_ref == 'security-scan-ee'
+          (github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee') && 
+          (matrix.js.status == 'failure' ||
+          matrix.go.status == 'failure')
         uses: slackapi/slack-github-action@v1.18.0
         with:
           # Slack channel id, channel name, or user id to post message.
