@@ -80,8 +80,8 @@ jobs:
         id: github_context_step
         run: echo '${{ toJSON(github) }}'
 
-  result-analysis:
-    name: Analyse scan result
+  result-analysis-compared-to-develop:
+    name: Analyse scan result compared to develop
     needs: client-dependencies
     runs-on: ubuntu-latest
     if: >-
@@ -95,7 +95,16 @@ jobs:
         run: |
           echo ${{ matrix.jsdiff.summary }}
 
-  result-analysis-compared-to-develop:
+      - name: Check job status of diff result
+        if: >-
+          github.ref != 'refs/heads/develop' &&
+          github.head_ref != 'security-scan-ee' && 
+          matrix.jsdiff.status == 'failure'
+        run: |
+          echo ${{ matrix.jsdiff.summary }}
+          exit 1
+
+  result-analysis:
     name: Analyse scan result compared to develop
     needs: client-dependencies
     runs-on: ubuntu-latest
