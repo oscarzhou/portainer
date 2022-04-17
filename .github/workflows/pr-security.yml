@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       js: ${{ steps.set-matrix.outputs.js_result }}
-      jsdiff: ${{ steps.set-diff-matrix.outputs.js_result }}
+      jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
       - uses: actions/checkout@master
 
@@ -73,7 +73,7 @@ jobs:
         id: set-diff-matrix
         run: | 
           result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.3 -action=diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
-          echo "::set-output name=js_result::${result}"
+          echo "::set-output name=js_diff_result::${result}"
 
       - name: Dump context json
         id: github_context_step
@@ -94,8 +94,8 @@ jobs:
         run: |
           echo ${{ matrix.jsdiff.summary }}
 
-  result-analysis-for-develop:
-    name: Analyse scan result
+  result-analysis-compared-to-develop:
+    name: Analyse scan result compared to develop
     needs: client-dependencies
     runs-on: ubuntu-latest
     if: >-
