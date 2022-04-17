@@ -83,15 +83,31 @@ jobs:
     name: Analyse scan result
     needs: client-dependencies
     runs-on: ubuntu-latest
+    if: >-
+      github.ref != 'refs/heads/develop' && 
+      github.head_ref != 'security-scan-ee'
     strategy:
       matrix: 
-        js: ${{fromJson(needs.client-dependencies.outputs.js)}}
         jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
     steps:
       - name: Display the js result
         run: |
-          echo ${{ matrix.js.summary }}
           echo ${{ matrix.jsdiff.summary }}
+
+  result-analysis-for-develop:
+    name: Analyse scan result
+    needs: client-dependencies
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref == 'refs/heads/develop' ||
+      github.head_ref == 'security-scan-ee'
+    strategy:
+      matrix: 
+        js: ${{fromJson(needs.client-dependencies.outputs.js)}}
+    steps:
+      - name: Display the js result
+        run: |
+          echo ${{ matrix.js.summary }}
 
       # - name: Download artifacts from develop branch
       #   if: >-
