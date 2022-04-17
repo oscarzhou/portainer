@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - develop
+      - security-scan-ee
   schedule:
     - cron: '30 * * * *'
 jobs:
@@ -15,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       js: ${{ steps.set-matrix.outputs.js_result }}
+      jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
       - uses: actions/checkout@master
 
@@ -42,25 +44,72 @@ jobs:
           github.ref != 'refs/heads/develop' && 
           github.head_ref != 'security-scan-ee'
         with:
-          name: js-security-scan-${{github.run_id}}-result.json
+          name: js-security-scan-feat-result.json
           path: snyk.json
 
-      - name: Analyse the result
+      - name: Analyse the js result
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
+
+      - name: Download artifacts from develop branch
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          mv ./snyk.json ./js-snyk-feature.json
+          gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
+          mv ./snyk.json ./js-snyk-develop.json
+
+      - name: Analyse the js diff result
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        id: set-diff-matrix
+        run: | 
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
+          echo $result
+          echo "::set-output name=js_diff_result::${result}"
 
       - name: Dump context json
         id: github_context_step
         run: echo '${{ toJSON(github) }}'
 
+  result-analysis-compared-to-develop:
+    name: Analyse scan result compared to develop
+    needs: client-dependencies
+    runs-on: ubuntu-latest
+    if: >-
+      github.ref != 'refs/heads/develop' && 
+      github.head_ref != 'security-scan-ee'
+    strategy:
+      matrix: 
+        jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
+    steps:
+      - name: Display the js result
+        run: |
+          echo ${{ matrix.jsdiff.summary }}
+
+      - name: Check job status of diff result
+        if: >-
+          github.ref != 'refs/heads/develop' &&
+          github.head_ref != 'security-scan-ee' && 
+          matrix.jsdiff.status == 'failure'
+        run: |
+          echo ${{ matrix.jsdiff.summary }}
+          exit 1
 
   result-analysis:
     name: Analyse scan result
     needs: client-dependencies
     runs-on: ubuntu-latest
-    if: >- 
+    if: >-
       github.ref == 'refs/heads/develop' ||
       github.head_ref == 'security-scan-ee'
     strategy:
@@ -72,7 +121,9 @@ jobs:
           echo ${{ matrix.js.summary }}
 
       - name: Post the result to a Slack channel
-        id: slack
+        if: >- 
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         uses: slackapi/slack-github-action@v1.18.0
         with:
           # Slack channel id, channel name, or user id to post message.
