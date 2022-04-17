@@ -26,6 +26,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
+          args: --severity-threshold=high --fail-on=upgradable
           json: true
 
       - name: Upload js security scan result as artifact on develop
@@ -105,7 +106,7 @@ jobs:
           exit 1
 
   result-analysis:
-    name: Analyse scan result compared to develop
+    name: Analyse scan result
     needs: client-dependencies
     runs-on: ubuntu-latest
     if: >-
@@ -118,24 +119,6 @@ jobs:
       - name: Display the js result
         run: |
           echo ${{ matrix.js.summary }}
-
-      # - name: Download artifacts from develop branch
-      #   if: >-
-      #     github.ref != 'refs/heads/develop' && 
-      #     github.head_ref != 'security-scan-ee'
-      #   env:
-      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      #   run: |
-      #     gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
-      #     mv ./snyk.json ./js-snyk-develop.json
-
-      # - name: Download artifact from current workflow
-      #   if: >-
-      #     github.ref != 'refs/heads/develop' && 
-      #     github.head_ref != 'security-scan-ee'
-      #   uses: actions/download-artifact@v3
-      #   with:  
-      #     name: js-security-scan-feat-result.json
 
       - name: Post the result to a Slack channel
         if: >- 
