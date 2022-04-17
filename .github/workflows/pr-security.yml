@@ -45,16 +45,38 @@ jobs:
           name: js-security-scan-feat-result.json
           path: snyk.json
 
-      - name: Analyse the result
+      - name: Analyse the js result
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.2 -action=summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.3 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          echo "::set-output name=js_result::${result}"
+
+      - name: Download artifacts from develop branch
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          mv ./snyk.json ./js-snyk-feature.json
+          gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
+          mv ./snyk.json ./js-snyk-develop.json
+
+      - name: Analyse the js diff result
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        id: set-matrix
+        run: | 
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.3 -action=diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
 
       - name: Dump context json
         id: github_context_step
         run: echo '${{ toJSON(github) }}'
-
 
   result-analysis:
     name: Analyse scan result
@@ -68,30 +90,23 @@ jobs:
         run: |
           echo ${{ matrix.js.summary }}
 
-      - name: Download artifacts from develop branch
-        if: >-
-          github.ref != 'refs/heads/develop' && 
-          github.head_ref != 'security-scan-ee'
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
-          mv ./snyk.json ./js-snyk-develop.json
-        # gh run download ${{ github.run_id }} -n js-security-scan-feat-result.json -R ${{ github.repository }}
-        # mv ./snyk.json ./js-snyk-current.json
-        # ls -lha
+      # - name: Download artifacts from develop branch
+      #   if: >-
+      #     github.ref != 'refs/heads/develop' && 
+      #     github.head_ref != 'security-scan-ee'
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     gh run download -n js-security-scan-develop-result.json -R ${{ github.repository }}
+      #     mv ./snyk.json ./js-snyk-develop.json
 
-      - name: Download artifact from current workflow
-        if: >-
-          github.ref != 'refs/heads/develop' && 
-          github.head_ref != 'security-scan-ee'
-        uses: actions/download-artifact@v3
-        with:  
-          name: js-security-scan-feat-result.json
-
-      - name: Debug info
-        run: | 
-          ls -lha
+      # - name: Download artifact from current workflow
+      #   if: >-
+      #     github.ref != 'refs/heads/develop' && 
+      #     github.head_ref != 'security-scan-ee'
+      #   uses: actions/download-artifact@v3
+      #   with:  
+      #     name: js-security-scan-feat-result.json
 
       - name: Post the result to a Slack channel
         if: >- 
