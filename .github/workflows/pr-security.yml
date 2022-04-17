@@ -155,7 +155,7 @@ jobs:
           
   result-analysis-compared-to-develop:
     name: Analyse scan result compared to develop
-    needs: client-dependencies
+    needs: [client-dependencies, server-dependencies]
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' && 
