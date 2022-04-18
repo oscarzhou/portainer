@@ -67,8 +67,10 @@ jobs:
         continue-on-error: true # To make sure that artifact upload gets called
         run: |
           mv ./snyk.json ./js-snyk-feature.json
-          downloadError=$(gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null)
-          echo ${downloadError}
+          gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null
+          if [[ -e js-snyk-develop.json ]]; then
+            echo "null" > ./js-snyk-develop.json
+          fi
 
       - name: Analyse the js diff result
         if: >-
