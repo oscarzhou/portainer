@@ -64,6 +64,7 @@ jobs:
           github.head_ref != 'security-scan-ee'
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        continue-on-error: true # To make sure that artifact upload gets called
         run: |
           mv ./snyk.json ./js-snyk-feature.json
           downloadError=$(gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null)
