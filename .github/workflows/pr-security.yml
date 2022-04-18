@@ -68,11 +68,7 @@ jobs:
         run: |
           mv ./snyk.json ./js-snyk-feature.json
           downloadError=$(gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null)
-          if [[ -n ${downloadError} ]]; then
-            echo "null" > ./js-snyk-develop.json
-          else
-            mv ./snyk.json ./js-snyk-develop.json
-          fi
+          echo ${downloadError}
 
       - name: Analyse the js diff result
         if: >-
