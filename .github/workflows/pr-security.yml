@@ -69,7 +69,7 @@ jobs:
           downloadError=$(gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null)
           if [[ -n downloadError ]]; then
             echo "null" > ./js-snyk-develop.json
-          elif
+          else
             mv ./snyk.json ./js-snyk-develop.json
           fi
 
