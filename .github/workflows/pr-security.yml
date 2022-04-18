@@ -139,8 +139,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          mv ./snyk.json ./go-snyk-feature
-          gh run download -n go-security-scan-develop-result.json -R ${{ github.repository }}
+          mv ./snyk.json ./go-snyk-feature.json
+          gh run download -n go-security-scan-develop-result -R ${{ github.repository }}
           mv ./snyk.json ./go-snyk-develop.json
         # check if the develop file is downloaded or not 
 
@@ -152,10 +152,121 @@ jobs:
         run: | 
           result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="./data/go-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=go_diff_result::${result}"
+
+  build_image:
+    name: Build docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Use golang 1.17.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: '>=1.17.0'
+
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Install packages and build
+        run: yarn install && yarn build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: build/linux/Dockerfile
+          tags: trivy-portainer:${{ github.sha }}
+          outputs: type=docker,dest=/tmp/trivy-portainer-image.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: image-artifact
+          path: /tmp/trivy-portainer-image.tar
+
+  image-vulnerability:
+    name: Image vulnerability check
+    needs: [build_image]
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.set-matrix.outputs.image_result }}
+      imagediff: ${{ steps.set-diff-matrix.outputs.image_diff_result }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v3
+        with:  
+          name: image-artifact
+          path: /tmp
+
+      - name: Load docker image
+        run: |
+          docker load --input /tmp/trivy-portainer-image.tar
+
+      - name: Run Trivy vulnerability scanner
+        uses: docker://docker.io/aquasec/trivy:latest
+        continue-on-error: true 
+        with:
+          args: image --ignore-unfixed=true --vuln-type="os,library" --severity="CRITICAL,HIGH,MEDIUM" --exit-code=1 --format="json" --output="image-trivy.json" --no-progress trivy-portainer:${{ github.sha }}
           
+      - name: Upload image security scan result as artifact on develop
+        uses: actions/upload-artifact@v3
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
+        with:
+          name: image-security-scan-develop-result
+          path: image-trivy.json
+
+      - name: Upload image security scan result as artifact
+        uses: actions/upload-artifact@v3
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        with:
+          name: image-security-scan-feat-result
+          path: image-trivy.json
+
+      - name: Analyse the trivy result
+        if: >-
+          github.ref == 'refs/heads/develop' ||
+          github.head_ref == 'security-scan-ee'
+        id: set-matrix
+        run: | 
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 summary -report-type=trivy -path="/data/image-trivy.json" -output-type=matrix)
+          echo "::set-output name=image_result::${result}"
+
+      - name: Download artifacts from develop branch
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          mv ./image-trivy.json ./image-trivy-feature.json
+          gh run download -n image-security-scan-develop-result -R ${{ github.repository }}
+          mv ./image-trivy.json ./image-trivy-develop.json
+        # check if the develop file is downloaded or not 
+
+      - name: Analyse the image diff result
+        if: >-
+          github.ref != 'refs/heads/develop' && 
+          github.head_ref != 'security-scan-ee'
+        id: set-diff-matrix
+        run: | 
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=trivy -path="/data/image-trivy-feature.json" -compare-to="./data/image-trivy-develop.json" -output-type=matrix)
+          echo "::set-output name=image_diff_result::${result}"
+
   result-analysis-compared-to-develop:
     name: Analyse scan result compared to develop
-    needs: [client-dependencies, server-dependencies]
+    needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' && 
@@ -164,26 +275,30 @@ jobs:
       matrix: 
         jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
         godiff: ${{fromJson(needs.client-dependencies.outputs.godiff)}}
+        imagediff: ${{fromJson(needs.client-dependencies.outputs.imagediff)}}
     steps:
-      - name: Display the js and go result
+      - name: Display the results of js, go and image
         run: |
           echo ${{ matrix.jsdiff.summary }}
           echo ${{ matrix.godiff.summary }}
+          echo ${{ matrix.imagediff.summary }}
 
       - name: Check job status of diff result
         if: >-
           github.ref != 'refs/heads/develop' &&
           github.head_ref != 'security-scan-ee' && 
           (matrix.jsdiff.status == 'failure' || 
-          matrix.godiff.status == 'failure')
+          matrix.godiff.status == 'failure' || 
+          matrix.trivy.status == 'failure')
         run: |
           echo ${{ matrix.jsdiff.summary }}
           echo ${{ matrix.godiff.summary }}
+          echo ${{ matrix.imagediff.summary }}
           exit 1
 
   result-analysis:
     name: Analyse scan result
-    needs: [client-dependencies, server-dependencies]
+    needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
       github.ref == 'refs/heads/develop' ||
@@ -192,11 +307,13 @@ jobs:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
         go: ${{fromJson(needs.server-dependencies.outputs.go)}}
+        image: ${{fromJson(needs.server-dependencies.outputs.image)}}
     steps:
-      - name: Display the js and go result
+      - name: Display the results of js, go and image
         run: |
           echo ${{ matrix.js.summary }}
           echo ${{ matrix.go.summary }}
+          echo ${{ matrix.image.summary }}
 
       - name: Post the result to a Slack channel
         if: >- 
@@ -212,13 +329,13 @@ jobs:
           # For posting a rich message using Block Kit
           payload: |
             {
-              "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}",
+              "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary\nImage vulnerability check: ${{ matrix.image.status }} ${{ matrix.image.summary }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}"
+                    "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary\nImage vulnerability check: ${{ matrix.image.status }} ${{ matrix.image.summary }}"
                   }
                 }
               ]
