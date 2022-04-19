@@ -55,7 +55,7 @@ jobs:
           github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
 
       - name: Download artifacts from develop branch
@@ -79,7 +79,7 @@ jobs:
           github.head_ref != 'security-scan-ee'
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=js_diff_result::${result}"
 
       - name: Dump context json
@@ -135,7 +135,7 @@ jobs:
           github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=go_result::${result}"
 
       - name: Download artifacts from develop branch
@@ -159,7 +159,7 @@ jobs:
           github.head_ref != 'security-scan-ee'
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="./data/go-snyk-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="./data/go-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=go_diff_result::${result}"
 
   build_image:
@@ -249,7 +249,7 @@ jobs:
           github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 summary -report-type=trivy -path="/data/image-trivy.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 summary -report-type=trivy -path="/data/image-trivy.json" -output-type=matrix)
           echo "::set-output name=image_result::${result}"
 
       - name: Download artifacts from develop branch
@@ -279,7 +279,7 @@ jobs:
           github.head_ref != 'security-scan-ee'
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.4 diff -report-type=trivy -path="/data/image-trivy-feature.json" -compare-to="./data/image-trivy-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 diff -report-type=trivy -path="/data/image-trivy-feature.json" -compare-to="./data/image-trivy-develop.json" -output-type=matrix)
           echo "::set-output name=image_diff_result::${result}"
 
   result-analysis-compared-to-develop:
