@@ -289,7 +289,7 @@ jobs:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
         go: ${{fromJson(needs.server-dependencies.outputs.go)}}
-        image: ${{fromJson(needs.image-dependencies.outputs.image)}}
+        image: ${{fromJson(needs.image-vulnerability.outputs.image)}}
     steps:
       - name: Display the results of js, go and image
         run: |
