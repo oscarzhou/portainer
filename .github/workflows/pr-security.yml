@@ -18,7 +18,6 @@ jobs:
     outputs:
       js: ${{ steps.set-matrix.outputs.js_result }}
       jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
-    if: github.ref == 'refs/heads/develop' # Temporary disable client check
     steps:
       - uses: actions/checkout@master
 
@@ -55,7 +54,7 @@ jobs:
           github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=js_result::${result}"
 
       - name: Download artifacts from develop branch
@@ -79,17 +78,12 @@ jobs:
           github.head_ref != 'security-scan-ee'
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=js_diff_result::${result}"
-
-      - name: Dump context json
-        id: github_context_step
-        run: echo '${{ toJSON(github) }}'
 
   server-dependencies:
     name: Server dependency check
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop' # Temporary disable client check
     outputs:
       go: ${{ steps.set-matrix.outputs.go_result }}
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
@@ -126,7 +120,7 @@ jobs:
           github.ref != 'refs/heads/develop' && 
           github.head_ref != 'security-scan-ee'
         with:
-          name: go-security-scan-feat-result
+          name: go-security-scan-feature-result
           path: snyk.json
 
       - name: Analyse the go result
@@ -135,7 +129,7 @@ jobs:
           github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
           echo "::set-output name=go_result::${result}"
 
       - name: Download artifacts from develop branch
@@ -159,7 +153,7 @@ jobs:
           github.head_ref != 'security-scan-ee'
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="./data/go-snyk-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="./data/go-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=go_diff_result::${result}"
 
   image-vulnerability:
@@ -230,7 +224,7 @@ jobs:
           github.head_ref == 'security-scan-ee'
         id: set-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 summary -report-type=trivy -path="/data/image-trivy.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 summary -report-type=trivy -path="/data/image-trivy.json" -output-type=matrix)
           echo "::set-output name=image_result::${result}"
 
       - name: Download artifacts from develop branch
@@ -254,56 +248,47 @@ jobs:
           github.head_ref != 'security-scan-ee'
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.5 diff -report-type=trivy -path="/data/image-trivy-feature.json" -compare-to="./data/image-trivy-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 diff -report-type=trivy -path="/data/image-trivy-feature.json" -compare-to="./data/image-trivy-develop.json" -output-type=matrix)
           echo "::set-output name=image_diff_result::${result}"
 
   result-analysis-compared-to-develop:
     name: Analyse scan result compared to develop
-    # needs: [client-dependencies, server-dependencies, image-vulnerability]
-    needs: [image-vulnerability]
+    needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' && 
       github.head_ref != 'security-scan-ee'
     strategy:
       matrix: 
-        # jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
-        # godiff: ${{fromJson(needs.server-dependencies.outputs.godiff)}}
+        jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
+        godiff: ${{fromJson(needs.server-dependencies.outputs.godiff)}}
         imagediff: ${{fromJson(needs.image-vulnerability.outputs.imagediff)}}
     steps:
-      # - name: Display the results of js, go and image
-      #   run: |
-      #     echo ${{ matrix.jsdiff.summary }}
-      #     echo ${{ matrix.godiff.summary }}
-      #     echo ${{ matrix.imagediff.summary }}
 
       - name: Check job status of diff result
-        # if: >-
-        #   github.ref != 'refs/heads/develop' &&
-        #   github.head_ref != 'security-scan-ee' && 
-        #   (matrix.jsdiff.status == 'failure' || 
-        #   matrix.godiff.status == 'failure' || 
-        #   matrix.imagediff.status == 'failure')
         if: >-
           github.ref != 'refs/heads/develop' &&
           github.head_ref != 'security-scan-ee' && 
-          matrix.imagediff.status == 'failure' 
+          (matrix.jsdiff.status == 'failure' || 
+          matrix.godiff.status == 'failure' || 
+          matrix.imagediff.status == 'failure')
         run: |
+          echo ${{ matrix.jsdiff.summary }}
+          echo ${{ matrix.godiff.summary }}
           echo ${{ matrix.imagediff.summary }}
           exit 1
 
   result-analysis:
     name: Analyse scan result
-    # needs: [client-dependencies, server-dependencies, image-vulnerability]
-    needs: [image-vulnerability]
+    needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
       github.ref == 'refs/heads/develop' ||
       github.head_ref == 'security-scan-ee'
     strategy:
       matrix: 
-        # js: ${{fromJson(needs.client-dependencies.outputs.js)}}
-        # go: ${{fromJson(needs.server-dependencies.outputs.go)}}
+        js: ${{fromJson(needs.client-dependencies.outputs.js)}}
+        go: ${{fromJson(needs.server-dependencies.outputs.go)}}
         image: ${{fromJson(needs.image-dependencies.outputs.image)}}
     steps:
       - name: Display the results of js, go and image
@@ -317,7 +302,8 @@ jobs:
           (github.ref == 'refs/heads/develop' ||
           github.head_ref == 'security-scan-ee') && 
           (matrix.js.status == 'failure' ||
-          matrix.go.status == 'failure')
+          matrix.go.status == 'failure' || 
+          matrix.image.status == 'failure')
         uses: slackapi/slack-github-action@v1.18.0
         with:
           # Slack channel id, channel name, or user id to post message.
@@ -326,13 +312,13 @@ jobs:
           # For posting a rich message using Block Kit
           payload: |
             {
-              "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}\nImage vulnerability check: ${{ matrix.image.status }} ${{ matrix.image.summary }}",
+              "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}\nImage vulnerability check: ${{ matrix.image.status }} ${{ matrix.image.summary }}\n${{ github.event.pull_request._links.html.href }}",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}\nImage vulnerability check: ${{ matrix.image.status }} ${{ matrix.image.summary }}",
+                    "text": "Code Scanning Result:\nJS dependency check: ${{ matrix.js.status }} ${{ matrix.js.summary }}\nGo dependency check: ${{ matrix.go.status }} ${{ matrix.go.summary }}\nImage vulnerability check: ${{ matrix.image.status }} ${{ matrix.image.summary }}\n${{ github.event.pull_request._links.html.href }}"
                   }
                 }
               ]
