@@ -268,8 +268,8 @@ jobs:
     strategy:
       matrix: 
         # jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
-        # godiff: ${{fromJson(needs.client-dependencies.outputs.godiff)}}
-        imagediff: ${{fromJson(needs.client-dependencies.outputs.imagediff)}}
+        # godiff: ${{fromJson(needs.server-dependencies.outputs.godiff)}}
+        imagediff: ${{fromJson(needs.image-vulnerability.outputs.imagediff)}}
     steps:
       # - name: Display the results of js, go and image
       #   run: |
@@ -304,7 +304,7 @@ jobs:
       matrix: 
         # js: ${{fromJson(needs.client-dependencies.outputs.js)}}
         # go: ${{fromJson(needs.server-dependencies.outputs.go)}}
-        image: ${{fromJson(needs.server-dependencies.outputs.image)}}
+        image: ${{fromJson(needs.image-dependencies.outputs.image)}}
     steps:
       - name: Display the results of js, go and image
         run: |
