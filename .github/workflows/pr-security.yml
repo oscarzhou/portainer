@@ -87,14 +87,11 @@ jobs:
     outputs:
       go: ${{ steps.set-matrix.outputs.go_result }}
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
-    defaults:
-      run:
-        working-directory: ./api
     steps:
       - uses: actions/checkout@master
 
       - name: Download dependencies
-        run: go get -v -d
+        run: cd ./api && go get -v -d
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/golang@master
