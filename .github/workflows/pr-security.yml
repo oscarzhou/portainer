@@ -1,7 +1,6 @@
 name: PR Code Security Scan
 
-on: 
-  workflow_dispatch:
+on: workflow_dispatch:
     
 jobs:
   client-dependencies:
