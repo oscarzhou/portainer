@@ -27,7 +27,6 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high --fail-on=upgradable
           json: true
 
       - name: Upload js security scan result as artifact on develop
@@ -87,23 +86,29 @@ jobs:
     outputs:
       go: ${{ steps.set-matrix.outputs.go_result }}
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
-    defaults:
-      run:
-        working-directory: ./api
     steps:
       - uses: actions/checkout@master
 
-      - name: Download dependencies
-        run: go get -v -d
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
-        continue-on-error: true # To make sure that artifact upload gets called
+      - name: Test Download golang modules
         env:
+          GOPRIVATE: github.com/portainer/*
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --file=./api/go.mod
-          json: true
+        run: |
+          yarn global add snyk
+          snyk version
+          git config --global url."https://api:${{secrets.PAT}}@github.com/".insteadOf "https://github.com/"
+          go get github.com/portainer/liblicense
+          snyk test --file=./api/go.mod --json-file-output=snyk.json
+              
+      # - name: Run Snyk to check for vulnerabilities
+      #   uses: snyk/actions/golang@master
+      #   continue-on-error: true # To make sure that artifact upload gets called
+      #   env:
+      #     SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      #   with:
+      #     args: --severity-threshold=high --file=./api/go.mod
+      #     json: true
 
       - name: Upload go security scan result as artifact on develop
         uses: actions/upload-artifact@v3
