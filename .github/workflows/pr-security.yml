@@ -207,4 +207,5 @@ jobs:
           matrix.jsdiff.status == 'failure' 
         run: |
           echo ${{ matrix.jsdiff.summary }}
+          echo '${{ toJSON(matrix.jsdiff) }}'
           exit 1
