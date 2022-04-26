@@ -29,10 +29,10 @@ jobs:
 
       - name: Download artifacts from develop branch
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mv ./snyk.json ./js-snyk-feature.json
-          (gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null) || :
+          gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 
           if [[ -e ./snyk.json ]]; then
             mv ./snyk.json ./js-snyk-develop.json
           else
