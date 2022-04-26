@@ -8,11 +8,12 @@ on:
     
 jobs:
   client-dependencies:
-    name: Client dependency check
+    name: 'PR Code Security Scan / Client dependency check'
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' && 
-      github.event.issue.pull_request && github.event.comment.body == '/scan'
+      github.event.issue.pull_request && 
+      github.event.comment.body == '/scan'
     outputs:
       jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
@@ -61,11 +62,12 @@ jobs:
           echo "::set-output name=js_diff_result::${result}"
 
   server-dependencies:
-    name: Server dependency check
+    name: 'PR Code Security Scan / Server dependency check'
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' && 
-      github.event.issue.pull_request && github.event.comment.body == '/scan'
+      github.event.issue.pull_request && 
+      github.event.comment.body == '/scan'
     outputs:
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
     steps:
@@ -118,11 +120,12 @@ jobs:
           echo "::set-output name=go_diff_result::${result}"
 
   image-vulnerability:
-    name: Build docker image and Image vulnerability check
+    name: 'PR Code Security Scan / image check'
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' && 
-      github.event.issue.pull_request && github.event.comment.body == '/scan'
+      github.event.issue.pull_request && 
+      github.event.comment.body == '/scan'
     outputs:
       imagediff: ${{ steps.set-diff-matrix.outputs.image_diff_result }}
     steps:
@@ -198,12 +201,13 @@ jobs:
           echo "::set-output name=image_diff_result::${result}"
 
   result-analysis:
-    name: Analyse scan result compared to develop
+    name: 'PR Code Security Scan / Analyse scan result compared to develop'
     needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' && 
-      github.event.issue.pull_request && github.event.comment.body == '/scan'
+      github.event.issue.pull_request && 
+      github.event.comment.body == '/scan'
     strategy:
       matrix: 
         jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
