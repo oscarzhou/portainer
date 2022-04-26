@@ -39,10 +39,20 @@ jobs:
             echo "null" > ./js-snyk-develop.json
           fi
 
+     - name: Export scan result to html file 
+        run: | 
+          $(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="/data/js-snyk-develop.json" -output-type=table -export -export-filename="/data/js-result")
+
+      - name: Upload js result html file
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-js-result-compare-to-develop-${{github.run_id}}
+          path: js-result.html
+
       - name: Analyse the js diff result
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=js_diff_result::${result}"
 
   server-dependencies:
@@ -84,10 +94,20 @@ jobs:
             echo "null" > ./go-snyk-develop.json
           fi
 
+     - name: Export scan result to html file 
+        run: | 
+          $(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="/data/go-snyk-develop.json" -output-type=table -export -export-filename="/data/go-result")
+
+      - name: Upload go result html file
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-go-result-compare-to-develop-${{github.run_id}}
+          path: go-result.html
+
       - name: Analyse the go diff result
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="./data/go-snyk-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="/data/go-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=go_diff_result::${result}"
 
   image-vulnerability:
@@ -152,10 +172,20 @@ jobs:
             echo "null" > ./image-trivy-develop.json
           fi
 
+     - name: Export scan result to html file 
+        run: | 
+          $(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/image-trivy-feature.json" -compare-to="/data/image-trivy-develop.json" -output-type=table -export -export-filename="/data/image-result")
+
+      - name: Upload image result html file
+        uses: actions/upload-artifact@v3
+        with:
+          name: html-image-result-compare-to-develop-${{github.run_id}}
+          path: image-result.html
+
       - name: Analyse the image diff result
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v /home/runner/work/portainer/portainer:/data oscarzhou/scan-report:0.1.6 diff -report-type=trivy -path="/data/image-trivy-feature.json" -compare-to="./data/image-trivy-develop.json" -output-type=matrix)
+          result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=trivy -path="/data/image-trivy-feature.json" -compare-to="./data/image-trivy-develop.json" -output-type=matrix)
           echo "::set-output name=image_diff_result::${result}"
 
   result-analysis-compared-to-develop:
