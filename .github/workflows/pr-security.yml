@@ -52,6 +52,7 @@ jobs:
       - name: Analyse the js diff result
         id: set-diff-matrix
         run: | 
+          cat ./js-snyk-develop.json
           result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=js_diff_result::${result}"
 
