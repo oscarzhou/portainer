@@ -4,7 +4,9 @@ on:
   workflow_run:
     workflows: [Test Frontend]
     types:
-      - requested
+      - completed
+  pull_request_review:
+      types: [edited, submitted] 
   workflow_dispatch:
     
 jobs:
