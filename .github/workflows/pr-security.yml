@@ -1,9 +1,10 @@
 name: PR Code Security Scan
 
 on: 
-  pull_request:
-    branches:
-      - develop
+  workflow_run:
+    types: [requested]
+    branches-ignore:
+      - "develop"
   workflow_dispatch:
     
 jobs:
