@@ -32,7 +32,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mv ./snyk.json ./js-snyk-feature.json
-          (gh run download -n go-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null) || :
+          (gh run download -n js-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null) || :
           if [[ -e ./snyk.json ]]; then
             mv ./snyk.json ./js-snyk-develop.json
           else
