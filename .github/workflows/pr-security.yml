@@ -2,7 +2,7 @@ name: PR Code Security Scan
 
 on: 
   workflow_run:
-    workflows: [Test Fronted]
+    workflows: [Test Frontend]
     types:
       - requested
   workflow_dispatch:
