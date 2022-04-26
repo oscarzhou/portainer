@@ -6,7 +6,6 @@ jobs:
   client-dependencies:
     name: Client dependency check
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/develop' 
     outputs:
       jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
@@ -58,7 +57,6 @@ jobs:
   server-dependencies:
     name: Server dependency check
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/develop' 
     outputs:
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
     steps:
@@ -113,7 +111,6 @@ jobs:
   image-vulnerability:
     name: Build docker image and Image vulnerability check
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/develop' 
     outputs:
       imagediff: ${{ steps.set-diff-matrix.outputs.image_diff_result }}
     steps:
@@ -192,7 +189,6 @@ jobs:
     name: Analyse scan result compared to develop
     needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/develop' 
     strategy:
       matrix: 
         jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
