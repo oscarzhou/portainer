@@ -53,59 +53,59 @@ jobs:
           result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=js_diff_result::${result}"
 
-  server-dependencies:
-    name: Server dependency check
-    runs-on: ubuntu-latest
-    outputs:
-      godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
-    steps:
-      - uses: actions/checkout@master
+  # server-dependencies:
+  #   name: Server dependency check
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
+  #   steps:
+  #     - uses: actions/checkout@master
 
-      - name: Download dependencies
-        run: cd ./api && go get -v -d
+  #     - name: Download dependencies
+  #       run: cd ./api && go get -v -d
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/golang@master
-        continue-on-error: true # To make sure that artifact upload gets called
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high --file=./api/go.mod
-          json: true
+  #     - name: Run Snyk to check for vulnerabilities
+  #       uses: snyk/actions/golang@master
+  #       continue-on-error: true # To make sure that artifact upload gets called
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  #       with:
+  #         args: --severity-threshold=high --file=./api/go.mod
+  #         json: true
 
-      - name: Upload go security scan result as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: go-security-scan-feature-result
-          path: snyk.json
+  #     - name: Upload go security scan result as artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: go-security-scan-feature-result
+  #         path: snyk.json
 
-      - name: Download artifacts from develop branch
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          mv ./snyk.json ./go-snyk-feature.json
-          (gh run download -n go-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null) || :
-          if [[ -e ./snyk.json ]]; then
-            mv ./snyk.json ./go-snyk-develop.json
-          else
-            echo "null" > ./go-snyk-develop.json
-          fi
+  #     - name: Download artifacts from develop branch
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  #       run: |
+  #         mv ./snyk.json ./go-snyk-feature.json
+  #         (gh run download -n go-security-scan-develop-result -R ${{ github.repository }} 2>&1 >/dev/null) || :
+  #         if [[ -e ./snyk.json ]]; then
+  #           mv ./snyk.json ./go-snyk-develop.json
+  #         else
+  #           echo "null" > ./go-snyk-develop.json
+  #         fi
 
-      - name: Export scan result to html file 
-        run: | 
-          $(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="/data/go-snyk-develop.json" -output-type=table -export -export-filename="/data/go-result")
+  #     - name: Export scan result to html file 
+  #       run: | 
+  #         $(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="/data/go-snyk-develop.json" -output-type=table -export -export-filename="/data/go-result")
 
-      - name: Upload go result html file
-        uses: actions/upload-artifact@v3
-        with:
-          name: html-go-result-compare-to-develop-${{github.run_id}}
-          path: go-result.html
+  #     - name: Upload go result html file
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: html-go-result-compare-to-develop-${{github.run_id}}
+  #         path: go-result.html
 
-      - name: Analyse the go diff result
-        id: set-diff-matrix
-        run: | 
-          result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="/data/go-snyk-develop.json" -output-type=matrix)
-          echo "::set-output name=go_diff_result::${result}"
+  #     - name: Analyse the go diff result
+  #       id: set-diff-matrix
+  #       run: | 
+  #         result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/go-snyk-feature.json" -compare-to="/data/go-snyk-develop.json" -output-type=matrix)
+  #         echo "::set-output name=go_diff_result::${result}"
 
   # image-vulnerability:
   #   name: Build docker image and Image vulnerability check
