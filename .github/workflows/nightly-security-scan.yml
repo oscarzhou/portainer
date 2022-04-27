@@ -3,6 +3,7 @@ name: Nightly Code Security Scan
 on: 
   schedule:
     - cron: '0 8 * * *'
+  push:
   workflow_dispatch:
     
 jobs:
@@ -180,6 +181,11 @@ jobs:
           echo ${{ matrix.go.summary }}
           echo ${{ matrix.image.summary }}
 
+      - name: Dump context json
+        id: github_context_step
+        run: | 
+          echo '${{ toJSON(github) }}'
+          
       - name: Send Slack message
         if: >- 
           matrix.js.status == 'failure' ||
