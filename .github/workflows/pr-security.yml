@@ -2,9 +2,13 @@ name: PR Code Security Scan
 
 on: 
   pull_request:
-  issue_comment:
-    types:
-      - created
+    paths:
+      - 'package.json'
+      - 'api/go.mod'
+      - 'gruntfile.js'
+      - 'build/linux/Dockerfile'
+      - 'build/linux/alpine.Dockerfile'
+      - 'build/windows/Dockerfile'
   workflow_dispatch:
     
 jobs:
@@ -12,9 +16,7 @@ jobs:
     name: 'PR Code Security Scan / Client dependency check'
     runs-on: ubuntu-latest
     if: >-
-      github.ref != 'refs/heads/develop' && 
-      github.event.issue.pull_request && 
-      github.event.comment.body == '/scan'
+      github.ref != 'refs/heads/develop' 
     outputs:
       jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
@@ -72,9 +74,7 @@ jobs:
     name: 'PR Code Security Scan / Server dependency check'
     runs-on: ubuntu-latest
     if: >-
-      github.ref != 'refs/heads/develop' &&
-      github.event.issue.pull_request && 
-      github.event.comment.body == '/scan'
+      github.ref != 'refs/heads/develop' 
     outputs:
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
     steps:
@@ -130,9 +130,7 @@ jobs:
     name: 'PR Code Security Scan / Image check'
     runs-on: ubuntu-latest
     if: >-
-      github.ref != 'refs/heads/develop' && 
-      github.event.issue.pull_request && 
-      github.event.comment.body == '/scan'
+      github.ref != 'refs/heads/develop'
     outputs:
       imagediff: ${{ steps.set-diff-matrix.outputs.image_diff_result }}
     steps:
@@ -212,9 +210,7 @@ jobs:
     needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
-      github.ref != 'refs/heads/develop' && 
-      github.event.issue.pull_request && 
-      github.event.comment.body == '/scan'
+      github.ref != 'refs/heads/develop' 
     strategy:
       matrix: 
         jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
