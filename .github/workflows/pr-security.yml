@@ -212,9 +212,9 @@ jobs:
     needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
-      github.ref != 'refs/heads/develop' || 
-      (github.event.issue.pull_request && 
-      github.event.comment.body == '/scan')
+      github.ref != 'refs/heads/develop' && 
+      github.event.issue.pull_request && 
+      github.event.comment.body == '/scan'
     strategy:
       matrix: 
         jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
