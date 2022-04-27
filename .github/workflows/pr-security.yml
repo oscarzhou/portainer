@@ -3,7 +3,7 @@ name: PR Code Security Scan
 on: 
   issue_comment:
     types:
-    - created
+      - created
   workflow_dispatch:
     
 jobs:
@@ -120,7 +120,7 @@ jobs:
           echo "::set-output name=go_diff_result::${result}"
 
   image-vulnerability:
-    name: 'PR Code Security Scan / image check'
+    name: 'PR Code Security Scan / Image check'
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' || 
