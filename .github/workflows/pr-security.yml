@@ -11,7 +11,7 @@ jobs:
     name: 'PR Code Security Scan / Client dependency check'
     runs-on: ubuntu-latest
     if: >-
-      github.ref != 'refs/heads/develop' ||
+      github.ref != 'refs/heads/develop' || 
       (github.event.issue.pull_request && 
       github.event.comment.body == '/scan')
     outputs:
@@ -30,6 +30,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
+          args: --severity-threshold=high --fail-on=upgradable
           json: true
 
       - name: Upload js security scan result as artifact
