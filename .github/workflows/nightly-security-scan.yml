@@ -2,7 +2,7 @@ name: Nightly Code Security Scan
 
 on: 
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '0/5 * * * *'
   push:
   workflow_dispatch:
     
@@ -185,7 +185,7 @@ jobs:
         id: github_context_step
         run: | 
           echo '${{ toJSON(github) }}'
-          
+
       - name: Send Slack message
         if: >- 
           matrix.js.status == 'failure' ||
