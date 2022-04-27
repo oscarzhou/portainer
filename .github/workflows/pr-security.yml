@@ -11,13 +11,16 @@ jobs:
     name: 'PR Code Security Scan / Client dependency check'
     runs-on: ubuntu-latest
     if: >-
-      github.ref != 'refs/heads/develop' || 
-      (github.event.issue.pull_request && 
-      github.event.comment.body == '/scan')
+      github.ref != 'refs/heads/develop' 
     outputs:
       jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
       - uses: actions/checkout@master
+
+      - name: Dump context json
+        id: github_context_step
+        run: | 
+          echo '${{ toJSON(github) }}'
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master
@@ -67,7 +70,7 @@ jobs:
     if: >-
       github.ref != 'refs/heads/develop' ||
       (github.event.issue.pull_request && 
-      github.event.comment.body == '/scan')
+      github.event.comment.body == 'scan')
     outputs:
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
     steps:
