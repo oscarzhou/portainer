@@ -1,9 +1,6 @@
 name: Nightly Code Security Scan
 
 on: 
-  schedule:
-    - cron: '* 8 * * *'
-  push:
   workflow_dispatch:
     
 jobs:
