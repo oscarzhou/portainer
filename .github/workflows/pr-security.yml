@@ -1,7 +1,10 @@
 name: PR Code Security Scan
 
 on: 
-  pull_request:
+  pull_request_review_comment:
+    types:
+      - created
+      - edited
     paths:
       - 'package.json'
       - 'api/go.mod'
@@ -21,6 +24,11 @@ jobs:
       jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
       - uses: actions/checkout@master
+
+      - name: Dump context json
+        id: github_context_step
+        run: | 
+          echo '${{ toJSON(github) }}'
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master
