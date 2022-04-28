@@ -5,13 +5,13 @@ on:
     types:
       - created
       - edited
-    paths:
-      - 'package.json'
-      - 'api/go.mod'
-      - 'gruntfile.js'
-      - 'build/linux/Dockerfile'
-      - 'build/linux/alpine.Dockerfile'
-      - 'build/windows/Dockerfile'
+    # paths:
+    #   - 'package.json'
+    #   - 'api/go.mod'
+    #   - 'gruntfile.js'
+    #   - 'build/linux/Dockerfile'
+    #   - 'build/linux/alpine.Dockerfile'
+    #   - 'build/windows/Dockerfile'
   workflow_dispatch:
     
 jobs:
