@@ -1,9 +1,9 @@
 name: PR Code Security Scan
 
 on: 
-  pull_request_review_comment:
+  pull_request_review:
     types:
-      - created
+      - submitted
       - edited
     # paths:
     #   - 'package.json'
@@ -72,11 +72,6 @@ jobs:
         run: | 
           result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 diff -report-type=snyk -path="/data/js-snyk-feature.json" -compare-to="./data/js-snyk-develop.json" -output-type=matrix)
           echo "::set-output name=js_diff_result::${result}"
-
-      - name: Dump context json
-        id: github_context_step
-        run: | 
-          echo '${{ toJSON(github) }}'
 
   server-dependencies:
     name: 'PR Code Security Scan / Server dependency check'
