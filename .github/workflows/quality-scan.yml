@@ -1,7 +1,5 @@
 on:
   # runs on default branch
-  schedule:
-    - cron: "0 11 * * *"
   workflow_dispatch:
 
 jobs:
