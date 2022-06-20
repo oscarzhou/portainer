@@ -117,7 +117,7 @@
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
-    "msw": "^0.36.3",
+    "msw": "^0.39.2",
     "ng-file-upload": "~12.2.13",
     "parse-duration": "^1.0.2",
     "rc-slider": "^9.7.5",
