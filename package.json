@@ -65,7 +65,7 @@
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "^2.0.0",
-    "@fortawesome/fontawesome-free": "^5.15.4",
+    "@fortawesome/fontawesome-free": "^6.1.0",
     "@lineup-lite/hooks": "^1.6.0",
     "@nxmix/tokenize-ansi": "^3.0.0",
     "@open-amt-cloud-toolkit/ui-toolkit-react": "2.0.0",
