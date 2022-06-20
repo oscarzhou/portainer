@@ -1,10 +1,17 @@
 name: PR Code Security Scan
 
 on: 
-  issue_comment:
+  pull_request_review:
     types:
-      - created
-  workflow_dispatch:
+      - submitted
+      - edited
+    paths:
+      - 'package.json'
+      - 'api/go.mod'
+      - 'gruntfile.js'
+      - 'build/linux/Dockerfile'
+      - 'build/linux/alpine.Dockerfile'
+      - 'build/windows/Dockerfile'
     
 jobs:
   client-dependencies:
@@ -12,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' || 
-      (github.event.issue.pull_request && 
-      github.event.comment.body == '/scan')
+      (github.event.pull_request && 
+      github.event.review.body == '/scan')
     outputs:
       jsdiff: ${{ steps.set-diff-matrix.outputs.js_diff_result }}
     steps:
@@ -72,8 +79,8 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' ||
-      (github.event.issue.pull_request && 
-      github.event.comment.body == '/scan')
+      (github.event.pull_request && 
+      github.event.review.body == '/scan')
     outputs:
       godiff: ${{ steps.set-diff-matrix.outputs.go_diff_result }}
     steps:
@@ -130,8 +137,8 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' || 
-      (github.event.issue.pull_request && 
-      github.event.comment.body == '/scan')
+      (github.event.pull_request && 
+      github.event.review.body == '/scan')
     outputs:
       imagediff: ${{ steps.set-diff-matrix.outputs.image_diff_result }}
     steps:
@@ -212,8 +219,8 @@ jobs:
     runs-on: ubuntu-latest
     if: >-
       github.ref != 'refs/heads/develop' || 
-      (github.event.issue.pull_request && 
-      github.event.comment.body == '/scan')
+      (github.event.pull_request && 
+      github.event.review.body == '/scan')
     strategy:
       matrix: 
         jsdiff: ${{fromJson(needs.client-dependencies.outputs.jsdiff)}}
