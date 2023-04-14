@@ -45,7 +45,7 @@ jobs:
         id: set-matrix
         run: | 
           result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
-          echo "{name}={js_diff_result}" >> $GITHUB_OUTPUT
+          echo "js_result=${result}" >> $GITHUB_OUTPUT
 
   server-dependencies:
     name: Server Dependency Check
@@ -94,7 +94,7 @@ jobs:
         id: set-matrix
         run: | 
           result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 summary -report-type=snyk -path="/data/snyk.json" -output-type=matrix)
-          echo "{name}={go_result}" >> $GITHUB_OUTPUT
+          echo "go_result=${result}" >> $GITHUB_OUTPUT
 
   image-vulnerability:
     name: Image Vulnerability Check
@@ -130,7 +130,7 @@ jobs:
         id: set-matrix
         run: | 
           result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/scan-report:0.1.8 summary -report-type=trivy -path="/data/image-trivy.json" -output-type=matrix)
-          echo "{name}={image_result}" >> $GITHUB_OUTPUT
+          echo "image_result=${result}" >> $GITHUB_OUTPUT
 
   result-analysis:
     name: Analyse Scan Results
