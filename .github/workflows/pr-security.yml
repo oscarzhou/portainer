@@ -232,7 +232,7 @@ jobs:
           echo ${{ matrix.jsdiff.status }}
           echo ${{ matrix.godiff.status }}
           echo ${{ matrix.imagediff.status }}
-          echo ${{ matrix.jsdiff.summary }}
-          echo ${{ matrix.godiff.summary }}
-          echo ${{ matrix.imagediff.summary }}
+          echo -e "${{ matrix.js.summary }}"
+          echo -e "${{ matrix.go.summary }}"
+          echo -e "${{ matrix.image.summary }}"
           exit 1
