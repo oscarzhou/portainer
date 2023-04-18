@@ -180,21 +180,21 @@ jobs:
                       "type": "section",
                       "text": {
                         "type": "mrkdwn",
-                        "text": "*JS dependency check*: *${{ matrix.js.status }}*\n'${{ matrix.js.summary }}'"
+                        "text": "*JS dependency check*: *${{ matrix.js.status }}*\n${{ matrix.js.summary }}"
                       }
                     },
                     {
                       "type": "section",
                       "text": {
                         "type": "mrkdwn",
-                        "text": "*Go dependency check*: *${{ matrix.go.status }}*\n'${{ matrix.go.summary }}'"
+                        "text": "*Go dependency check*: *${{ matrix.go.status }}*\n${{ matrix.go.summary }}"
                       }
                     },
                     {
                       "type": "section",
                       "text": {
                         "type": "mrkdwn",
-                        "text": "*Image vulnerability check*: *${{ matrix.image.status }}*\n'${{ matrix.image.summary }}'\n"
+                        "text": "*Image vulnerability check*: *${{ matrix.image.status }}*\n${{ matrix.image.summary }}\n"
                       }
                     }
                   ]
