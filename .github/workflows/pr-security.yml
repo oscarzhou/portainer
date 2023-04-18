@@ -207,7 +207,7 @@ jobs:
       - name: Analyse Different Vulnerabilites Aginst develop Branch
         id: set-diff-matrix
         run: | 
-          result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/code-security-report:latest diff --report-type=trivy --path="/data/image-trivy-feature.json" --compare-to="./data/image-trivy-develop.json" --output-type=matrix)
+          result=$(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/code-security-report:latest diff --report-type=trivy --path="/data/image-trivy-feature.json" --compare-to="/data/image-trivy-develop.json" --output-type=matrix)
           echo "image_diff_result=${result}" >> $GITHUB_OUTPUT
 
   result-analysis:
