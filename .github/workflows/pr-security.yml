@@ -54,7 +54,8 @@ jobs:
 
       - name: PR vs Develop Scan Report Comparison Export to HTML
         run: | 
-          ls -lha
+          $(docker run --rm -v ${{ github.workspace }}:/data --entrypoint pwd oscarzhou/code-security-report:latest 
+          $(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/code-security-report:latest inspect
           $(docker run --rm -v ${{ github.workspace }}:/data oscarzhou/code-security-report:latest diff --report-type=snyk --path="/data/js-snyk-feature.json" --compare-to="/data/js-snyk-develop.json" --output-type=table --export --export-filename="/data/js-result")
 
       - name: Upload HTML File As Artifact
