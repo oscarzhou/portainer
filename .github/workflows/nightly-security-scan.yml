@@ -149,9 +149,9 @@ jobs:
           echo ${{ matrix.js.status }}
           echo ${{ matrix.go.status }}
           echo ${{ matrix.image.status }}
-          echo ${{ matrix.js.summary }}
-          echo ${{ matrix.go.summary }}
-          echo ${{ matrix.image.summary }}
+          echo -e "${{ matrix.js.summary }}"
+          echo -e "${{ matrix.go.summary }}"
+          echo -e "${{ matrix.image.summary }}"
 
       - name: Send Slack message
         if: >- 
