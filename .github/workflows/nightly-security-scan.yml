@@ -100,7 +100,7 @@ jobs:
     name: Image Vulnerability Check
     runs-on: ubuntu-latest
     if: >-
-      github.ref == 'refs/heads/mock-nightly-scan'
+      github.ref == 'refs/heads/mock-nigntly-scan'
     outputs:
       image: ${{ steps.set-matrix.outputs.image_result }}
     steps:
@@ -137,7 +137,7 @@ jobs:
     needs: [client-dependencies, server-dependencies, image-vulnerability]
     runs-on: ubuntu-latest
     if: >-
-      github.ref == 'refs/heads/mock-nightly-scan'
+      github.ref == 'refs/heads/mock-nigntly-scan'
     strategy:
       matrix: 
         js: ${{fromJson(needs.client-dependencies.outputs.js)}}
